@@ -162,4 +162,13 @@ public interface ErrorCodeConstants {
     // ========== 站内信发送 1-002-028-000 ==========
     ErrorCode NOTIFY_SEND_TEMPLATE_PARAM_MISS = new ErrorCode(1_002_028_000, "模板参数({})缺失");
 
+    // ========== 项目模块 1-002-004-000 ==========
+    ErrorCode PROJECT_NAME_DUPLICATE = new ErrorCode(1_002_004_000, "已经存在该名字的项目");
+    ErrorCode PROJECT_PARENT_NOT_EXITS = new ErrorCode(1_002_004_001,"父级项目不存在");
+    ErrorCode PROJECT_NOT_FOUND = new ErrorCode(1_002_004_002, "当前项目不存在");
+    ErrorCode PROJECT_EXITS_CHILDREN = new ErrorCode(1_002_004_003, "存在子项目，无法删除");
+    ErrorCode PROJECT_PARENT_ERROR = new ErrorCode(1_002_004_004, "不能设置自己为父项目");
+    ErrorCode PROJECT_NOT_ENABLE = new ErrorCode(1_002_004_006, "项目({})不处于开启状态，不允许选择");
+    ErrorCode PROJECT_PARENT_IS_CHILD = new ErrorCode(1_002_004_007, "不能设置自己的子项目为父项目");
+
 }
