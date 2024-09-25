@@ -3,7 +3,7 @@
 spring:
   cloud:
     nacos:
-      server-addr: 127.0.0.1:8848 # Nacos 服务器地址
+      server-addr: 202.118.19.61:8848 # Nacos 服务器地址
       username: # Nacos 账号
       password: # Nacos 密码
       discovery: # 【配置中心】配置项
@@ -56,28 +56,28 @@ spring:
       primary: master
       datasource:
         master:
-          url: jdbc:mysql://127.0.0.1:3306/ruoyi-vue-pro?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&rewriteBatchedStatements=true # MySQL Connector/J 8.X 连接的示例
+          url: jdbc:mysql://202.118.19.61:3306/ruoyi-vue-pro?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&rewriteBatchedStatements=true # MySQL Connector/J 8.X 连接的示例
           #          url: jdbc:mysql://127.0.0.1:3306/ruoyi-vue-pro?useSSL=true&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true # MySQL Connector/J 5.X 连接的示例
           #          url: jdbc:postgresql://127.0.0.1:5432/ruoyi-vue-pro # PostgreSQL 连接的示例
           #          url: jdbc:oracle:thin:@127.0.0.1:1521:xe # Oracle 连接的示例
           #          url: jdbc:sqlserver://127.0.0.1:1433;DatabaseName=ruoyi-vue-pro # SQLServer 连接的示例
           #          url: jdbc:dm://10.211.55.4:5236?schema=RUOYI_VUE_PRO # DM 连接的示例
           username: root
-          password: 123456
+          password: DBMS109
         #          username: sa # SQL Server 连接的示例
         #          password: JSm:g(*%lU4ZAkz06cd52KqT3)i1?H7W # SQL Server 连接的示例
         #          username: SYSDBA # DM 连接的示例
         #          password: SYSDBA # DM 连接的示例
         slave: # 模拟从库，可根据自己需要修改
           lazy: true # 开启懒加载，保证启动速度
-          url: jdbc:mysql://127.0.0.1:3306/ruoyi-vue-pro?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&rewriteBatchedStatements=true
+          url: jdbc:mysql://202.118.19.61:3306/ruoyi-vue-pro?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&rewriteBatchedStatements=true
           username: root
-          password: 123456
+          password: DBMS109
 
   # Redis 配置。Redisson 默认的配置足够使用，一般不需要进行调优
   data:
     redis:
-      host: 127.0.0.1 # 地址
+      host: 202.118.19.61 # 地址
       port: 6379 # 端口
       database: 0 # 数据库索引
 #      password: 123456 # 密码，建议生产环境开启
@@ -86,18 +86,18 @@ spring:
 
 # rocketmq 配置项，对应 RocketMQProperties 配置类
 rocketmq:
-  name-server: 127.0.0.1:9876 # RocketMQ Namesrv
+  name-server: 202.118.19.61:9876 # RocketMQ Namesrv
 
 spring:
   # RabbitMQ 配置项，对应 RabbitProperties 配置类
   rabbitmq:
-    host: 127.0.0.1 # RabbitMQ 服务的地址
+    host: 202.118.19.61 # RabbitMQ 服务的地址
     port: 5672 # RabbitMQ 服务的端口
     username: guest # RabbitMQ 服务的账号
     password: guest # RabbitMQ 服务的密码
   # Kafka 配置项，对应 KafkaProperties 配置类
   kafka:
-    bootstrap-servers: 127.0.0.1:9092 # 指定 Kafka Broker 地址，可以设置多个，以逗号分隔
+    bootstrap-servers: 202.118.19.61:9092 # 指定 Kafka Broker 地址，可以设置多个，以逗号分隔
 
 --- #################### 定时任务相关配置 ####################
 
@@ -105,7 +105,7 @@ xxl:
   job:
     enabled: false # 是否开启调度中心，默认为 true 开启
     admin:
-      addresses: http://127.0.0.1:9090/xxl-job-admin # 调度中心部署跟地址
+      addresses: http://202.118.19.61:9090/xxl-job-admin # 调度中心部署跟地址
 
 --- #################### 服务保障相关配置 ####################
 

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>yudao</artifactId>
+        <groupId>cn.iocoder.cloud</groupId>
+        <version>${revision}</version>
+    </parent>
+    <modules>
+        <module>mayrain-module-lab-api</module>
+        <module>mayrain-module-lab-biz</module>
+    </modules>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>mayrain-module-lab</artifactId>
+
+    <packaging>pom</packaging>
+    <name>${project.artifactId}</name>
+    <description>
+        mayrain-lab模块，实现实验室日常管理和师生使用
+    </description>
+
+</project>

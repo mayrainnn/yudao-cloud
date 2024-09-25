@@ -23,6 +23,7 @@
         <module>yudao-module-crm</module>
         <module>yudao-module-erp</module>
         <module>yudao-module-ai</module>
+        <module>mayrain-module-lab</module>
     </modules>
 
     <name>${project.artifactId}</name>
