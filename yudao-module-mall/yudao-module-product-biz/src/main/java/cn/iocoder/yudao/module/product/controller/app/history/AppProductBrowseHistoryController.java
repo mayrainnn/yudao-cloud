@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.security.core.annotations.PreAuthenticated;
 import cn.iocoder.yudao.module.product.controller.admin.history.vo.ProductBrowseHistoryPageReqVO;
 import cn.iocoder.yudao.module.product.controller.app.history.vo.AppProductBrowseHistoryDeleteReqVO;
 import cn.iocoder.yudao.module.product.controller.app.history.vo.AppProductBrowseHistoryPageReqVO;
@@ -14,10 +15,10 @@ import cn.iocoder.yudao.module.product.service.history.ProductBrowseHistoryServi
 import cn.iocoder.yudao.module.product.service.spu.ProductSpuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.validation.Valid;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -39,6 +40,7 @@ public class AppProductBrowseHistoryController {
 
     @DeleteMapping(value = "/delete")
     @Operation(summary = "删除商品浏览记录")
+    @PreAuthenticated
     public CommonResult<Boolean> deleteBrowseHistory(@RequestBody @Valid AppProductBrowseHistoryDeleteReqVO reqVO) {
         productBrowseHistoryService.hideUserBrowseHistory(getLoginUserId(), reqVO.getSpuIds());
         return success(Boolean.TRUE);
@@ -46,6 +48,7 @@ public class AppProductBrowseHistoryController {
 
     @DeleteMapping(value = "/clean")
     @Operation(summary = "清空商品浏览记录")
+    @PreAuthenticated
     public CommonResult<Boolean> deleteBrowseHistory() {
         productBrowseHistoryService.hideUserBrowseHistory(getLoginUserId(), null);
         return success(Boolean.TRUE);
@@ -53,6 +56,7 @@ public class AppProductBrowseHistoryController {
 
     @GetMapping(value = "/page")
     @Operation(summary = "获得商品浏览记录分页")
+    @PreAuthenticated
     public CommonResult<PageResult<AppProductBrowseHistoryRespVO>> getBrowseHistoryPage(AppProductBrowseHistoryPageReqVO reqVO) {
         ProductBrowseHistoryPageReqVO pageReqVO = BeanUtils.toBean(reqVO, ProductBrowseHistoryPageReqVO.class)
                 .setUserId(getLoginUserId())

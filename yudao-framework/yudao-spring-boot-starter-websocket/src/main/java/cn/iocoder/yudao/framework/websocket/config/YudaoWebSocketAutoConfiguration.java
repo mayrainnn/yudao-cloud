@@ -85,7 +85,7 @@ public class YudaoWebSocketAutoConfiguration {
     // ==================== Sender 相关 ====================
 
     @Configuration
-    @ConditionalOnProperty(prefix = "yudao.websocket", name = "sender-type", havingValue = "local")
+    @ConditionalOnProperty(prefix = "yudao.websocket", name = "sender-type", havingValue = "local", matchIfMissing = true)
     public class LocalWebSocketMessageSenderConfiguration {
 
         @Bean
@@ -96,7 +96,7 @@ public class YudaoWebSocketAutoConfiguration {
     }
 
     @Configuration
-    @ConditionalOnProperty(prefix = "yudao.websocket", name = "sender-type", havingValue = "redis")
+    @ConditionalOnProperty(prefix = "yudao.websocket", name = "sender-type", havingValue = "redis", matchIfMissing = true)
     public class RedisWebSocketMessageSenderConfiguration {
 
         @Bean
@@ -114,7 +114,7 @@ public class YudaoWebSocketAutoConfiguration {
     }
 
     @Configuration
-    @ConditionalOnProperty(prefix = "yudao.websocket", name = "sender-type", havingValue = "rocketmq")
+    @ConditionalOnProperty(prefix = "yudao.websocket", name = "sender-type", havingValue = "rocketmq", matchIfMissing = true)
     public class RocketMQWebSocketMessageSenderConfiguration {
 
         @Bean
@@ -133,7 +133,7 @@ public class YudaoWebSocketAutoConfiguration {
     }
 
     @Configuration
-    @ConditionalOnProperty(prefix = "yudao.websocket", name = "sender-type", havingValue = "rabbitmq")
+    @ConditionalOnProperty(prefix = "yudao.websocket", name = "sender-type", havingValue = "rabbitmq", matchIfMissing = true)
     public class RabbitMQWebSocketMessageSenderConfiguration {
 
         @Bean
@@ -162,7 +162,7 @@ public class YudaoWebSocketAutoConfiguration {
     }
 
     @Configuration
-    @ConditionalOnProperty(prefix = "yudao.websocket", name = "sender-type", havingValue = "kafka")
+    @ConditionalOnProperty(prefix = "yudao.websocket", name = "sender-type", havingValue = "kafka", matchIfMissing = true)
     public class KafkaWebSocketMessageSenderConfiguration {
 
         @Bean

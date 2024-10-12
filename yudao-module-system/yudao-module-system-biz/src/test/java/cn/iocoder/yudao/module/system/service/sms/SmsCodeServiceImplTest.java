@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.system.service.sms;
 
 import cn.hutool.core.map.MapUtil;
+import cn.iocoder.yudao.framework.mybatis.core.enums.SqlConstants;
 import cn.iocoder.yudao.framework.test.core.ut.BaseDbUnitTest;
 import cn.iocoder.yudao.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
 import cn.iocoder.yudao.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
@@ -9,12 +10,13 @@ import cn.iocoder.yudao.module.system.dal.dataobject.sms.SmsCodeDO;
 import cn.iocoder.yudao.module.system.dal.mysql.sms.SmsCodeMapper;
 import cn.iocoder.yudao.module.system.enums.sms.SmsSceneEnum;
 import cn.iocoder.yudao.module.system.framework.sms.config.SmsCodeProperties;
+import com.baomidou.mybatisplus.annotation.DbType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -59,6 +61,8 @@ public class SmsCodeServiceImplTest extends BaseDbUnitTest {
             o.setMobile("15601691300");
             o.setScene(SmsSceneEnum.MEMBER_LOGIN.getScene());
         });
+        // mock 方法
+        SqlConstants.init(DbType.MYSQL);
 
         // 调用
         smsCodeService.sendSmsCode(reqDTO);
@@ -84,6 +88,8 @@ public class SmsCodeServiceImplTest extends BaseDbUnitTest {
             o.setMobile("15601691300");
             o.setScene(SmsSceneEnum.MEMBER_LOGIN.getScene());
         });
+        // mock 方法
+        SqlConstants.init(DbType.MYSQL);
 
         // 调用，并断言异常
         assertServiceException(() -> smsCodeService.sendSmsCode(reqDTO),
@@ -101,6 +107,8 @@ public class SmsCodeServiceImplTest extends BaseDbUnitTest {
             o.setMobile("15601691300");
             o.setScene(SmsSceneEnum.MEMBER_LOGIN.getScene());
         });
+        // mock 方法
+        SqlConstants.init(DbType.MYSQL);
         when(smsCodeProperties.getSendFrequency()).thenReturn(Duration.ofMillis(0));
 
         // 调用，并断言异常
@@ -115,6 +123,8 @@ public class SmsCodeServiceImplTest extends BaseDbUnitTest {
             o.setMobile("15601691300");
             o.setScene(randomEle(SmsSceneEnum.values()).getScene());
         });
+        // mock 数据
+        SqlConstants.init(DbType.MYSQL);
         smsCodeMapper.insert(randomPojo(SmsCodeDO.class, o -> {
             o.setMobile(reqDTO.getMobile()).setScene(reqDTO.getScene())
                     .setCode(reqDTO.getCode()).setUsed(false);
@@ -136,6 +146,8 @@ public class SmsCodeServiceImplTest extends BaseDbUnitTest {
             o.setMobile("15601691300");
             o.setScene(randomEle(SmsSceneEnum.values()).getScene());
         });
+        // mock 数据
+        SqlConstants.init(DbType.MYSQL);
         smsCodeMapper.insert(randomPojo(SmsCodeDO.class, o -> o.setMobile(reqDTO.getMobile())
                 .setScene(reqDTO.getScene()).setCode(reqDTO.getCode()).setUsed(false)));
 
@@ -150,6 +162,8 @@ public class SmsCodeServiceImplTest extends BaseDbUnitTest {
             o.setMobile("15601691300");
             o.setScene(randomEle(SmsSceneEnum.values()).getScene());
         });
+        // mock 数据
+        SqlConstants.init(DbType.MYSQL);
 
         // 调用，并断言异常
         assertServiceException(() -> smsCodeService.validateSmsCode(reqDTO),
@@ -163,6 +177,8 @@ public class SmsCodeServiceImplTest extends BaseDbUnitTest {
             o.setMobile("15601691300");
             o.setScene(randomEle(SmsSceneEnum.values()).getScene());
         });
+        // mock 数据
+        SqlConstants.init(DbType.MYSQL);
         smsCodeMapper.insert(randomPojo(SmsCodeDO.class, o -> o.setMobile(reqDTO.getMobile())
                 .setScene(reqDTO.getScene()).setCode(reqDTO.getCode()).setUsed(false)
                 .setCreateTime(LocalDateTime.now().minusMinutes(6))));
@@ -179,6 +195,8 @@ public class SmsCodeServiceImplTest extends BaseDbUnitTest {
             o.setMobile("15601691300");
             o.setScene(randomEle(SmsSceneEnum.values()).getScene());
         });
+        // mock 数据
+        SqlConstants.init(DbType.MYSQL);
         smsCodeMapper.insert(randomPojo(SmsCodeDO.class, o -> o.setMobile(reqDTO.getMobile())
                 .setScene(reqDTO.getScene()).setCode(reqDTO.getCode()).setUsed(true)
                 .setCreateTime(LocalDateTime.now())));

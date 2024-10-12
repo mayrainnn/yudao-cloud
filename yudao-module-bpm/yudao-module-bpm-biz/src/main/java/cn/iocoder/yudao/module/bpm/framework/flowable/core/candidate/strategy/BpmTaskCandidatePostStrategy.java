@@ -6,6 +6,8 @@ import cn.iocoder.yudao.module.bpm.framework.flowable.core.enums.BpmTaskCandidat
 import cn.iocoder.yudao.module.system.api.dept.PostApi;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
+import jakarta.annotation.Resource;
+import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,14 +21,12 @@ import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.
  * @author kyle
  */
 @Component
-public class BpmTaskCandidatePostStrategy extends BpmTaskCandidateAbstractStrategy {
+public class BpmTaskCandidatePostStrategy implements BpmTaskCandidateStrategy {
 
-    private final PostApi postApi;
-
-    public BpmTaskCandidatePostStrategy(AdminUserApi adminUserApi, PostApi postApi) {
-        super(adminUserApi);
-        this.postApi = postApi;
-    }
+    @Resource
+    private PostApi postApi;
+    @Resource
+    private AdminUserApi adminUserApi;
 
     @Override
     public BpmTaskCandidateStrategyEnum getStrategy() {
@@ -36,11 +36,11 @@ public class BpmTaskCandidatePostStrategy extends BpmTaskCandidateAbstractStrate
     @Override
     public void validateParam(String param) {
         Set<Long> postIds = StrUtils.splitToLongSet(param);
-        postApi.validPostList(postIds);
+        postApi.validPostList(postIds).checkError();
     }
 
     @Override
-    public Set<Long> calculateUsers(String param) {
+    public Set<Long> calculateUsers(DelegateExecution execution, String param) {
         Set<Long> postIds = StrUtils.splitToLongSet(param);
         List<AdminUserRespDTO> users = adminUserApi.getUserListByPostIds(postIds).getCheckedData();
         return convertSet(users, AdminUserRespDTO::getId);

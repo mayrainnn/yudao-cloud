@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * 优惠劵领取方式
@@ -21,12 +20,12 @@ public enum CouponTakeTypeEnum implements IntArrayValuable {
     REGISTER(3, "新人券"), // 注册时自动领取
     ;
 
-    public static final int[] ARRAYS = Arrays.stream(values()).mapToInt(CouponTakeTypeEnum::getType).toArray();
+    public static final int[] ARRAYS = Arrays.stream(values()).mapToInt(CouponTakeTypeEnum::getValue).toArray();
 
     /**
      * 值
      */
-    private final Integer type;
+    private final Integer value;
     /**
      * 名字
      */
@@ -36,9 +35,4 @@ public enum CouponTakeTypeEnum implements IntArrayValuable {
     public int[] array() {
         return ARRAYS;
     }
-
-    public static boolean isUser(Integer type) {
-        return Objects.equals(USER.getType(), type);
-    }
-
 }

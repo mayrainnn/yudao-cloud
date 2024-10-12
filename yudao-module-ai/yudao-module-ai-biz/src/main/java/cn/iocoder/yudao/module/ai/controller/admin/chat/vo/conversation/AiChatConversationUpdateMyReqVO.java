@@ -1,9 +1,8 @@
 package cn.iocoder.yudao.module.ai.controller.admin.chat.vo.conversation;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import javax.validation.constraints.NotNull;
 
 @Schema(description = "管理后台 - AI 聊天对话更新【我的】 Request VO")
 @Data
@@ -21,9 +20,6 @@ public class AiChatConversationUpdateMyReqVO {
 
     @Schema(description = "模型编号", example = "1")
     private Long modelId;
-
-    @Schema(description = "知识库编号", example = "1")
-    private Long knowledgeId;
 
     @Schema(description = "角色设定", example = "一个快乐的程序员")
     private String systemMessage;

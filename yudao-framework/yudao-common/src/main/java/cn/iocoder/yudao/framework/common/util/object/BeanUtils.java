@@ -59,11 +59,4 @@ public class BeanUtils {
         return new PageResult<>(list, source.getTotal());
     }
 
-    public static void copyProperties(Object source, Object target) {
-        if (source == null || target == null) {
-            return;
-        }
-        BeanUtil.copyProperties(source, target, false);
-    }
-
 }

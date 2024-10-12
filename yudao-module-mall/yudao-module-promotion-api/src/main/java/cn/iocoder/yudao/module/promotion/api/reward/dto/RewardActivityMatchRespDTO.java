@@ -19,11 +19,6 @@ import java.util.Map;
 public class RewardActivityMatchRespDTO {
 
     /**
-     * 匹配的 SPU 数组
-     */
-    private List<Long> spuIds;
-
-    /**
      * 活动编号，主键自增
      */
     private Long id;
@@ -104,13 +99,6 @@ public class RewardActivityMatchRespDTO {
          * 目的：用于订单支付后赠送优惠券
          */
         private Map<Long, Integer> giveCouponTemplateCounts;
-
-        /**
-         * 规则描述
-         *
-         * 通过 {@link #limit}、{@link #discountPrice} 等字段进行拼接
-         */
-        private String description;
 
     }
 

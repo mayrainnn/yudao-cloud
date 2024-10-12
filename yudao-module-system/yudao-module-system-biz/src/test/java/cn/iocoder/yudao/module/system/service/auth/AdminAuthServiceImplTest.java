@@ -21,15 +21,14 @@ import cn.iocoder.yudao.module.system.service.social.SocialUserService;
 import cn.iocoder.yudao.module.system.service.user.AdminUserService;
 import com.xingyuv.captcha.model.common.ResponseModel;
 import com.xingyuv.captcha.service.CaptchaService;
+import jakarta.annotation.Resource;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-
-import javax.annotation.Resource;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validation;
-import javax.validation.Validator;
 
 import static cn.hutool.core.util.RandomUtil.randomEle;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
@@ -194,6 +193,7 @@ public class AdminAuthServiceImplTest extends BaseDbUnitTest {
         // mock 方法（用户信息）
         AdminUserDO user = randomPojo(AdminUserDO.class);
         when(userService.getUserByMobile(eq(mobile))).thenReturn(user);
+        when(smsCodeApi.sendSmsCode(any())).thenReturn(success(true));
 
         // 调用
         authService.sendSmsCode(reqVO);
@@ -211,13 +211,13 @@ public class AdminAuthServiceImplTest extends BaseDbUnitTest {
         String mobile = randomString();
         String code = randomString();
         AuthSmsLoginReqVO reqVO = new AuthSmsLoginReqVO(mobile, code);
-        // mock 方法（验证码）
-        when(smsCodeApi.useSmsCode(argThat(smsCodeUseReqDTO -> {
-            assertEquals(mobile, smsCodeUseReqDTO.getMobile());
-            assertEquals(code, smsCodeUseReqDTO.getCode());
-            assertEquals(SmsSceneEnum.ADMIN_MEMBER_LOGIN.getScene(), smsCodeUseReqDTO.getScene());
+        // mock 方法（校验验证码）
+        when(smsCodeApi.useSmsCode(argThat(reqDTO -> {
+            assertEquals(mobile, reqDTO.getMobile());
+            assertEquals(code, reqDTO.getCode());
+            assertEquals(SmsSceneEnum.ADMIN_MEMBER_LOGIN.getScene(), reqDTO.getScene());
             return true;
-        }))).thenReturn(success(null));
+        }))).thenReturn(success(true));
         // mock 方法（用户信息）
         AdminUserDO user = randomPojo(AdminUserDO.class, o -> o.setId(1L));
         when(userService.getUserByMobile(eq(mobile))).thenReturn(user);

@@ -20,6 +20,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -51,12 +52,8 @@ public interface CrmCustomerMapper extends BaseMapperX<CrmCustomerDO> {
     default PageResult<CrmCustomerDO> selectPage(CrmCustomerPageReqVO pageReqVO, Long ownerUserId) {
         MPJLambdaWrapperX<CrmCustomerDO> query = new MPJLambdaWrapperX<>();
         // 拼接数据权限的查询条件
-        if (Boolean.TRUE.equals(pageReqVO.getPool())) {
-            query.isNull(CrmCustomerDO::getOwnerUserId);
-        } else {
-            CrmPermissionUtils.appendPermissionCondition(query, CrmBizTypeEnum.CRM_CUSTOMER.getType(),
-                    CrmCustomerDO::getId, ownerUserId, pageReqVO.getSceneType());
-        }
+        CrmPermissionUtils.appendPermissionCondition(query, CrmBizTypeEnum.CRM_CUSTOMER.getType(),
+                CrmCustomerDO::getId, ownerUserId, pageReqVO.getSceneType(), pageReqVO.getPool());
         // 拼接自身的查询条件
         query.selectAll(CrmCustomerDO.class)
                 .likeIfPresent(CrmCustomerDO::getName, pageReqVO.getName())
@@ -84,6 +81,15 @@ public interface CrmCustomerMapper extends BaseMapperX<CrmCustomerDO> {
         return selectJoinPage(pageReqVO, CrmCustomerDO.class, query);
     }
 
+    default List<CrmCustomerDO> selectBatchIds(Collection<Long> ids, Long ownerUserId) {
+        MPJLambdaWrapperX<CrmCustomerDO> query = new MPJLambdaWrapperX<>();
+        // 拼接数据权限的查询条件
+        CrmPermissionUtils.appendPermissionCondition(query, CrmBizTypeEnum.CRM_CUSTOMER.getType(), ids, ownerUserId);
+        // 拼接自身的查询条件
+        query.selectAll(CrmCustomerDO.class).in(CrmCustomerDO::getId, ids).orderByDesc(CrmCustomerDO::getId);
+        return selectJoinList(CrmCustomerDO.class, query);
+    }
+
     default CrmCustomerDO selectByCustomerName(String name) {
         return selectOne(CrmCustomerDO::getName, name);
     }
@@ -96,19 +102,19 @@ public interface CrmCustomerMapper extends BaseMapperX<CrmCustomerDO> {
     }
 
     default Long selectPutPoolRemindCustomerCount(CrmCustomerPageReqVO pageReqVO,
-                                                  CrmCustomerPoolConfigDO poolConfig,
+                                                  CrmCustomerPoolConfigDO poolConfigDO,
                                                   Long userId) {
-        final MPJLambdaWrapperX<CrmCustomerDO> query = buildPutPoolRemindCustomerQuery(pageReqVO, poolConfig, userId);
+        final MPJLambdaWrapperX<CrmCustomerDO> query = buildPutPoolRemindCustomerQuery(pageReqVO, poolConfigDO, userId);
         return selectCount(query);
     }
 
-    static MPJLambdaWrapperX<CrmCustomerDO> buildPutPoolRemindCustomerQuery(CrmCustomerPageReqVO pageReqVO,
+    private static MPJLambdaWrapperX<CrmCustomerDO> buildPutPoolRemindCustomerQuery(CrmCustomerPageReqVO pageReqVO,
                                                                                     CrmCustomerPoolConfigDO poolConfig,
                                                                                     Long ownerUserId) {
         MPJLambdaWrapperX<CrmCustomerDO> query = new MPJLambdaWrapperX<>();
         // 拼接数据权限的查询条件
         CrmPermissionUtils.appendPermissionCondition(query, CrmBizTypeEnum.CRM_CUSTOMER.getType(),
-                CrmCustomerDO::getId, ownerUserId, pageReqVO.getSceneType());
+                CrmCustomerDO::getId, ownerUserId, pageReqVO.getSceneType(), null);
 
         // 未锁定 + 未成交
         query.eq(CrmCustomerDO::getLockStatus, false).eq(CrmCustomerDO::getDealStatus, false);
@@ -162,7 +168,7 @@ public interface CrmCustomerMapper extends BaseMapperX<CrmCustomerDO> {
         MPJLambdaWrapperX<CrmCustomerDO> query = new MPJLambdaWrapperX<>();
         // 我负责的 + 非公海
         CrmPermissionUtils.appendPermissionCondition(query, CrmBizTypeEnum.CRM_CUSTOMER.getType(),
-                CrmCustomerDO::getId, ownerUserId, CrmSceneTypeEnum.OWNER.getType());
+                CrmCustomerDO::getId, ownerUserId, CrmSceneTypeEnum.OWNER.getType(), Boolean.FALSE);
         // 今天需联系
         LocalDateTime beginOfToday = LocalDateTimeUtil.beginOfDay(LocalDateTime.now());
         LocalDateTime endOfToday = LocalDateTimeUtil.endOfDay(LocalDateTime.now());
@@ -174,7 +180,7 @@ public interface CrmCustomerMapper extends BaseMapperX<CrmCustomerDO> {
         MPJLambdaWrapperX<CrmCustomerDO> query = new MPJLambdaWrapperX<>();
         // 我负责的 + 非公海
         CrmPermissionUtils.appendPermissionCondition(query, CrmBizTypeEnum.CRM_CUSTOMER.getType(),
-                CrmCustomerDO::getId, ownerUserId, CrmSceneTypeEnum.OWNER.getType());
+                CrmCustomerDO::getId, ownerUserId, CrmSceneTypeEnum.OWNER.getType(), Boolean.FALSE);
         // 未跟进
         query.eq(CrmClueDO::getFollowUpStatus, false);
         return selectCount(query);

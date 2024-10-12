@@ -2,6 +2,7 @@ package cn.iocoder.yudao.framework.mybatis.config;
 
 import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.common.util.collection.SetUtils;
+import cn.iocoder.yudao.framework.mybatis.core.enums.SqlConstants;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -41,6 +42,9 @@ public class IdTypeEnvironmentPostProcessor implements EnvironmentPostProcessor 
         // TODO 芋艿：暂时没有找到特别合适的地方，先放在这里
         setJobStoreDriverIfPresent(environment, dbType);
 
+        // 初始化 SQL 静态变量
+        SqlConstants.init(dbType);
+
         // 如果非 NONE，则不进行处理
         IdType idType = getIdType(environment);
         if (idType != IdType.NONE) {
@@ -51,7 +55,7 @@ public class IdTypeEnvironmentPostProcessor implements EnvironmentPostProcessor 
             setIdType(environment, IdType.INPUT);
             return;
         }
-        // 情况二，自增 ID，适合 MySQL、DM 达梦等直接自增的数据库
+        // 情况二，自增 ID，适合 MySQL 等直接自增的数据库
         setIdType(environment, IdType.AUTO);
     }
 
@@ -81,10 +85,6 @@ public class IdTypeEnvironmentPostProcessor implements EnvironmentPostProcessor 
             case SQL_SERVER:
             case SQL_SERVER2005:
                 driverClass = "org.quartz.impl.jdbcjobstore.MSSQLDelegate";
-                break;
-            case DM:
-            case KINGBASE_ES:
-                driverClass = "org.quartz.impl.jdbcjobstore.StdJDBCDelegate";
                 break;
         }
         // 设置 driverClass 变量

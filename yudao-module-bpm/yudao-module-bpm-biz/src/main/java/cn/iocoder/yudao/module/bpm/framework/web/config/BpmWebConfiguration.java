@@ -1,7 +1,9 @@
 package cn.iocoder.yudao.module.bpm.framework.web.config;
 
 import cn.iocoder.yudao.framework.common.enums.WebFilterOrderEnum;
+import cn.iocoder.yudao.framework.swagger.config.YudaoSwaggerAutoConfiguration;
 import cn.iocoder.yudao.module.bpm.framework.web.core.FlowableWebFilter;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

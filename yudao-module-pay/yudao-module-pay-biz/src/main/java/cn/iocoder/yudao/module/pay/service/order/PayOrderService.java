@@ -9,9 +9,9 @@ import cn.iocoder.yudao.module.pay.controller.admin.order.vo.PayOrderSubmitReqVO
 import cn.iocoder.yudao.module.pay.controller.admin.order.vo.PayOrderSubmitRespVO;
 import cn.iocoder.yudao.module.pay.dal.dataobject.order.PayOrderDO;
 import cn.iocoder.yudao.module.pay.dal.dataobject.order.PayOrderExtensionDO;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -138,16 +138,6 @@ public interface PayOrderService {
      * @return 同步到已支付的订单数量
      */
     int syncOrder(LocalDateTime minCreateTime);
-
-    /**
-     * 同步订单的支付状态
-     *
-     * 1. Quietly 表示，即使同步失败，也不会抛出异常
-     * 2. 什么时候回出现异常？因为是主动同步，可能和支付渠道的异步回调存在并发冲突，导致抛出异常
-     *
-     * @param id 订单编号
-     */
-    void syncOrderQuietly(Long id);
 
     /**
      * 将已过期的订单，状态修改为已关闭

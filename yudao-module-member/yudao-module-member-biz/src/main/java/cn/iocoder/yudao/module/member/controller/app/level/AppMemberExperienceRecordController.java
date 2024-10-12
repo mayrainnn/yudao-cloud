@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.member.controller.app.level;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.security.core.annotations.PreAuthenticated;
 import cn.iocoder.yudao.module.member.controller.app.level.vo.experience.AppMemberExperienceRecordRespVO;
 import cn.iocoder.yudao.module.member.convert.level.MemberExperienceRecordConvert;
 import cn.iocoder.yudao.module.member.dal.dataobject.level.MemberExperienceRecordDO;
@@ -14,8 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
-import javax.validation.Valid;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
@@ -31,6 +32,7 @@ public class AppMemberExperienceRecordController {
 
     @GetMapping("/page")
     @Operation(summary = "获得会员经验记录分页")
+    @PreAuthenticated
     public CommonResult<PageResult<AppMemberExperienceRecordRespVO>> getExperienceRecordPage(
             @Valid PageParam pageParam) {
         PageResult<MemberExperienceRecordDO> pageResult = experienceLogService.getExperienceRecordPage(

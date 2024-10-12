@@ -6,14 +6,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 
 /**
- * MP 模块的 Security 配置
+ * System 模块的 Security 配置
  */
-@Configuration(proxyBeanMethods = false, value = "mpSecurityConfiguration")
+@Configuration(proxyBeanMethods = false, value = "systemSecurityConfiguration")
 public class SecurityConfiguration {
 
-    @Bean("mpAuthorizeRequestsCustomizer")
+    @Bean("systemAuthorizeRequestsCustomizer")
     public AuthorizeRequestsCustomizer authorizeRequestsCustomizer() {
         return new AuthorizeRequestsCustomizer() {
 

@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.bpm.service.task;
 
+import cn.iocoder.yudao.module.bpm.controller.admin.task.vo.activity.BpmActivityRespVO;
 import org.flowable.engine.history.HistoricActivityInstance;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public interface BpmActivityService {
      * @param processInstanceId 流程实例的编号
      * @return 活动实例列表
      */
-    List<HistoricActivityInstance> getActivityListByProcessInstanceId(String processInstanceId);
+    List<BpmActivityRespVO> getActivityListByProcessInstanceId(String processInstanceId);
 
     /**
      * 获得执行编号对应的活动实例

@@ -27,10 +27,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.annotation.security.PermitAll;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import jakarta.annotation.Resource;
+import jakarta.annotation.security.PermitAll;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -113,13 +113,6 @@ public class AuthController {
 
         // 2. 拼接结果返回
         return success(AuthConvert.INSTANCE.convert(user, roles, menuList));
-    }
-
-    @PostMapping("/register")
-    @PermitAll
-    @Operation(summary = "注册用户")
-    public CommonResult<AuthLoginRespVO> register(@RequestBody @Valid AuthRegisterReqVO registerReqVO) {
-        return success(authService.register(registerReqVO));
     }
 
     // ========== 短信登录相关 ==========

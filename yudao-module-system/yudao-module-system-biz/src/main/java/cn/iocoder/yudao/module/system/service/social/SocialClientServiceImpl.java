@@ -38,6 +38,7 @@ import com.xingyuv.jushauth.model.AuthUser;
 import com.xingyuv.jushauth.request.AuthRequest;
 import com.xingyuv.jushauth.utils.AuthStateUtils;
 import com.xingyuv.justauth.AuthRequestFactory;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxJsapiSignature;
@@ -52,7 +53,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -280,8 +280,7 @@ public class SocialClientServiceImpl implements SocialClientService {
     }
 
     @Override
-    @Cacheable(cacheNames = RedisKeyConstants.WXA_SUBSCRIBE_TEMPLATE, key = "#userType",
-            unless = "#result == null")
+    @Cacheable(cacheNames = RedisKeyConstants.WXA_SUBSCRIBE_TEMPLATE, key = "#userType", condition = "#result != null")
     public List<TemplateInfo> getSubscribeTemplateList(Integer userType) {
         WxMaService service = getWxMaService(userType);
         try {

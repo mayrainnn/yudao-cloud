@@ -78,7 +78,7 @@ public class FileConfigDO extends TenantBaseDO {
 
         @Override
         public Object parse(String json) {
-            FileClientConfig config = JsonUtils.parseObjectQuietly(json, new TypeReference<FileClientConfig>() {});
+            FileClientConfig config = JsonUtils.parseObjectQuietly(json, new TypeReference<>() {});
             if (config != null) {
                 return config;
             }

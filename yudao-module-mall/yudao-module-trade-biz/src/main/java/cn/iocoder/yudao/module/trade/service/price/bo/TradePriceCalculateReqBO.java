@@ -3,9 +3,9 @@ package cn.iocoder.yudao.module.trade.service.price.bo;
 import cn.iocoder.yudao.module.trade.enums.delivery.DeliveryTypeEnum;
 import lombok.Data;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -83,12 +83,6 @@ public class TradePriceCalculateReqBO {
      * 砍价记录编号
      */
     private Long bargainRecordId;
-
-    // ========== 积分商城活动相关字段 ==========
-    /**
-     * 积分商城活动编号
-     */
-    private Long pointActivityId;
 
     /**
      * 商品 SKU

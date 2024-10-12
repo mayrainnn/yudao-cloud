@@ -13,7 +13,8 @@ import org.springframework.security.config.annotation.web.configurers.AuthorizeH
 @Configuration(proxyBeanMethods = false, value = "aiSecurityConfiguration")
 public class SecurityConfiguration {
 
-    @Bean("aiAuthorizeRequestsCustomizer")
+
+    @Bean("infraAuthorizeRequestsCustomizer")
     public AuthorizeRequestsCustomizer authorizeRequestsCustomizer() {
         return new AuthorizeRequestsCustomizer() {
 

@@ -13,6 +13,8 @@ import cn.iocoder.yudao.module.crm.util.CrmPermissionUtils;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -46,7 +48,7 @@ public interface CrmReceivablePlanMapper extends BaseMapperX<CrmReceivablePlanDO
         MPJLambdaWrapperX<CrmReceivablePlanDO> query = new MPJLambdaWrapperX<>();
         // 拼接数据权限的查询条件
         CrmPermissionUtils.appendPermissionCondition(query, CrmBizTypeEnum.CRM_RECEIVABLE_PLAN.getType(),
-                CrmReceivablePlanDO::getId, userId, pageReqVO.getSceneType());
+                CrmReceivablePlanDO::getId, userId, pageReqVO.getSceneType(), Boolean.FALSE);
         // 拼接自身的查询条件
         query.selectAll(CrmReceivablePlanDO.class)
                 .eqIfPresent(CrmReceivablePlanDO::getCustomerId, pageReqVO.getCustomerId())
@@ -72,11 +74,20 @@ public interface CrmReceivablePlanMapper extends BaseMapperX<CrmReceivablePlanDO
         return selectJoinPage(pageReqVO, CrmReceivablePlanDO.class, query);
     }
 
+    default List<CrmReceivablePlanDO> selectBatchIds(Collection<Long> ids, Long userId) {
+        MPJLambdaWrapperX<CrmReceivablePlanDO> query = new MPJLambdaWrapperX<>();
+        // 拼接数据权限的查询条件
+        CrmPermissionUtils.appendPermissionCondition(query, CrmBizTypeEnum.CRM_RECEIVABLE_PLAN.getType(), ids, userId);
+        // 拼接自身的查询条件
+        query.selectAll(CrmReceivablePlanDO.class).in(CrmReceivablePlanDO::getId, ids).orderByDesc(CrmReceivablePlanDO::getId);
+        return selectJoinList(CrmReceivablePlanDO.class, query);
+    }
+
     default Long selectReceivablePlanCountByRemind(Long userId) {
         MPJLambdaWrapperX<CrmReceivablePlanDO> query = new MPJLambdaWrapperX<>();
         // 我负责的 + 非公海
         CrmPermissionUtils.appendPermissionCondition(query, CrmBizTypeEnum.CRM_RECEIVABLE_PLAN.getType(),
-                CrmReceivablePlanDO::getId, userId, CrmSceneTypeEnum.OWNER.getType());
+                CrmReceivablePlanDO::getId, userId, CrmSceneTypeEnum.OWNER.getType(), Boolean.FALSE);
         // 未回款 + 已逾期 + 今天开始提醒
         LocalDateTime beginOfToday = LocalDateTimeUtil.beginOfDay(LocalDateTime.now());
         query.isNull(CrmReceivablePlanDO::getReceivableId) // 未回款

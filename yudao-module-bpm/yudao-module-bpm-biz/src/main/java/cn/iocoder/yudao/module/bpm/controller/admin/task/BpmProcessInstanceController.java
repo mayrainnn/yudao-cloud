@@ -4,7 +4,10 @@ import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.number.NumberUtils;
-import cn.iocoder.yudao.module.bpm.controller.admin.task.vo.instance.*;
+import cn.iocoder.yudao.module.bpm.controller.admin.task.vo.instance.BpmProcessInstanceCancelReqVO;
+import cn.iocoder.yudao.module.bpm.controller.admin.task.vo.instance.BpmProcessInstanceCreateReqVO;
+import cn.iocoder.yudao.module.bpm.controller.admin.task.vo.instance.BpmProcessInstancePageReqVO;
+import cn.iocoder.yudao.module.bpm.controller.admin.task.vo.instance.BpmProcessInstanceRespVO;
 import cn.iocoder.yudao.module.bpm.convert.task.BpmProcessInstanceConvert;
 import cn.iocoder.yudao.module.bpm.dal.dataobject.definition.BpmCategoryDO;
 import cn.iocoder.yudao.module.bpm.dal.dataobject.definition.BpmProcessDefinitionInfoDO;
@@ -20,6 +23,8 @@ import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.task.api.Task;
@@ -27,8 +32,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -155,22 +158,6 @@ public class BpmProcessInstanceController {
             @Valid @RequestBody BpmProcessInstanceCancelReqVO cancelReqVO) {
         processInstanceService.cancelProcessInstanceByAdmin(getLoginUserId(), cancelReqVO);
         return success(true);
-    }
-
-    @GetMapping("/get-form-fields-permission")
-    @Operation(summary = "获得表单字段权限")
-    @PreAuthorize("@ss.hasPermission('bpm:process-instance:query')")
-    public CommonResult<Map<String, String>> getFormFieldsPermission(
-            @Valid BpmFormFieldsPermissionReqVO reqVO) {
-        return success(processInstanceService.getFormFieldsPermission(reqVO));
-    }
-
-    @GetMapping("/get-approval-detail")
-    @Operation(summary = "获得审批详情")
-    @Parameter(name = "id", description = "流程实例的编号", required = true)
-    @PreAuthorize("@ss.hasPermission('bpm:process-instance:query')")
-    public CommonResult<BpmApprovalDetailRespVO> getApprovalDetail(@Valid BpmApprovalDetailReqVO reqVO) {
-        return success(processInstanceService.getApprovalDetail(getLoginUserId(), reqVO));
     }
 
 }

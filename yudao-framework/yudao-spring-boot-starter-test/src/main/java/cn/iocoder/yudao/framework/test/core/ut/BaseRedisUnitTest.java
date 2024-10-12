@@ -1,6 +1,5 @@
 package cn.iocoder.yudao.framework.test.core.ut;
 
-import cn.hutool.extra.spring.SpringUtil;
 import cn.iocoder.yudao.framework.redis.config.YudaoRedisAutoConfiguration;
 import cn.iocoder.yudao.framework.test.config.RedisTestConfiguration;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
@@ -26,9 +25,6 @@ public class BaseRedisUnitTest {
             RedisAutoConfiguration.class, // Spring Redis 自动配置类
             YudaoRedisAutoConfiguration.class, // 自己的 Redis 配置类
             RedissonAutoConfiguration.class, // Redisson 自动配置类
-
-            // 其它配置类
-            SpringUtil.class
     })
     public static class Application {
     }

@@ -16,7 +16,7 @@ import me.chanjar.weixin.common.bean.subscribemsg.TemplateInfo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import java.util.List;
 

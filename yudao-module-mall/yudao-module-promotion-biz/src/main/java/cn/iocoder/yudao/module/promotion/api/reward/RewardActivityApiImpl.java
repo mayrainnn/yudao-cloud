@@ -6,7 +6,7 @@ import cn.iocoder.yudao.module.promotion.service.reward.RewardActivityService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Collection;
 import java.util.List;
 
@@ -25,8 +25,8 @@ public class RewardActivityApiImpl implements RewardActivityApi {
     private RewardActivityService rewardActivityService;
 
     @Override
-    public CommonResult<List<RewardActivityMatchRespDTO>> getMatchRewardActivityListBySpuIds(Collection<Long> spuIds) {
-        return success(rewardActivityService.getMatchRewardActivityListBySpuIds(spuIds));
+    public CommonResult<List<RewardActivityMatchRespDTO>> getMatchRewardActivityList(Collection<Long> spuIds) {
+        return success(rewardActivityService.getMatchRewardActivityList(spuIds));
     }
 
 }

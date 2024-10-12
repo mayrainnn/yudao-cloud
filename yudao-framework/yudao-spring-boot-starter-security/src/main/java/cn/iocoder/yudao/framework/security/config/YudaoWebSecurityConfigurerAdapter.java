@@ -5,6 +5,8 @@ import cn.iocoder.yudao.framework.security.core.filter.TokenAuthenticationFilter
 import cn.iocoder.yudao.framework.web.config.WebProperties;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Resource;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.ApplicationContext;
@@ -28,8 +30,6 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPattern;
 
-import javax.annotation.Resource;
-import javax.annotation.security.PermitAll;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -129,15 +129,17 @@ public class YudaoWebSecurityConfigurerAdapter {
                 .authorizeHttpRequests(c -> c
                         // 1.1 静态资源，可匿名访问
                         .requestMatchers(HttpMethod.GET, "/*.html", "/*.html", "/*.css", "/*.js").permitAll()
-                        // 1.2 设置 @PermitAll 无需认证
+                        // 1.1 设置 @PermitAll 无需认证
                         .requestMatchers(HttpMethod.GET, permitAllUrls.get(HttpMethod.GET).toArray(new String[0])).permitAll()
                         .requestMatchers(HttpMethod.POST, permitAllUrls.get(HttpMethod.POST).toArray(new String[0])).permitAll()
                         .requestMatchers(HttpMethod.PUT, permitAllUrls.get(HttpMethod.PUT).toArray(new String[0])).permitAll()
                         .requestMatchers(HttpMethod.DELETE, permitAllUrls.get(HttpMethod.DELETE).toArray(new String[0])).permitAll()
                         .requestMatchers(HttpMethod.HEAD, permitAllUrls.get(HttpMethod.HEAD).toArray(new String[0])).permitAll()
                         .requestMatchers(HttpMethod.PATCH, permitAllUrls.get(HttpMethod.PATCH).toArray(new String[0])).permitAll()
-                        // 1.3 基于 yudao.security.permit-all-urls 无需认证
+                        // 1.2 基于 yudao.security.permit-all-urls 无需认证
                         .requestMatchers(securityProperties.getPermitAllUrls().toArray(new String[0])).permitAll()
+                        // 1.3 设置 App API 无需认证
+                        .requestMatchers(buildAppApi("/**")).permitAll()
                 )
                 // ②：每个项目的自定义规则
                 .authorizeHttpRequests(c -> authorizeRequestsCustomizers.forEach(customizer -> customizer.customize(c)))

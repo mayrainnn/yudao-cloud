@@ -4,7 +4,6 @@ import cn.hutool.core.convert.Convert;
 import cn.iocoder.yudao.module.bpm.framework.flowable.core.candidate.BpmTaskCandidateStrategy;
 import cn.iocoder.yudao.module.bpm.framework.flowable.core.enums.BpmTaskCandidateStrategyEnum;
 import cn.iocoder.yudao.module.bpm.framework.flowable.core.util.FlowableUtils;
-import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Component;
 
@@ -16,11 +15,7 @@ import java.util.Set;
  * @author 芋道源码
  */
 @Component
-public class BpmTaskCandidateExpressionStrategy extends BpmTaskCandidateAbstractStrategy {
-
-    public BpmTaskCandidateExpressionStrategy(AdminUserApi adminUserApi) {
-        super(adminUserApi);
-    }
+public class BpmTaskCandidateExpressionStrategy implements BpmTaskCandidateStrategy {
 
     @Override
     public BpmTaskCandidateStrategyEnum getStrategy() {
@@ -35,9 +30,7 @@ public class BpmTaskCandidateExpressionStrategy extends BpmTaskCandidateAbstract
     @Override
     public Set<Long> calculateUsers(DelegateExecution execution, String param) {
         Object result = FlowableUtils.getExpressionValue(execution, param);
-        Set<Long> users = Convert.toSet(Long.class, result);
-        removeDisableUsers(users);
-        return users;
+        return Convert.toSet(Long.class, result);
     }
 
 }

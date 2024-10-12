@@ -13,17 +13,15 @@ import cn.iocoder.yudao.module.ai.dal.dataobject.chat.AiChatConversationDO;
 import cn.iocoder.yudao.module.ai.dal.dataobject.model.AiChatModelDO;
 import cn.iocoder.yudao.module.ai.dal.dataobject.model.AiChatRoleDO;
 import cn.iocoder.yudao.module.ai.dal.mysql.chat.AiChatConversationMapper;
-import cn.iocoder.yudao.module.ai.service.knowledge.AiKnowledgeService;
 import cn.iocoder.yudao.module.ai.service.model.AiChatModelService;
 import cn.iocoder.yudao.module.ai.service.model.AiChatRoleService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertList;
@@ -47,8 +45,6 @@ public class AiChatConversationServiceImpl implements AiChatConversationService 
     private AiChatModelService chatModalService;
     @Resource
     private AiChatRoleService chatRoleService;
-    @Resource
-    private AiKnowledgeService knowledgeService;
 
     @Override
     public Long createChatConversationMy(AiChatConversationCreateMyReqVO createReqVO, Long userId) {
@@ -60,14 +56,9 @@ public class AiChatConversationServiceImpl implements AiChatConversationService 
         Assert.notNull(model, "必须找到默认模型");
         validateChatModel(model);
 
-        // 1.3 校验知识库
-        if (Objects.nonNull(createReqVO.getKnowledgeId())) {
-            knowledgeService.validateKnowledgeExists(createReqVO.getKnowledgeId());
-        }
-
         // 2. 创建 AiChatConversationDO 聊天对话
         AiChatConversationDO conversation = new AiChatConversationDO().setUserId(userId).setPinned(false)
-                .setModelId(model.getId()).setModel(model.getModel()).setKnowledgeId(createReqVO.getKnowledgeId())
+                .setModelId(model.getId()).setModel(model.getModel())
                 .setTemperature(model.getTemperature()).setMaxTokens(model.getMaxTokens()).setMaxContexts(model.getMaxContexts());
         if (role != null) {
             conversation.setTitle(role.getName()).setRoleId(role.getId()).setSystemMessage(role.getSystemMessage());
@@ -89,11 +80,6 @@ public class AiChatConversationServiceImpl implements AiChatConversationService 
         AiChatModelDO model = null;
         if (updateReqVO.getModelId() != null) {
             model = chatModalService.validateChatModel(updateReqVO.getModelId());
-        }
-
-        // 1.3 校验知识库是否存在
-        if (updateReqVO.getKnowledgeId() != null) {
-            knowledgeService.validateKnowledgeExists(updateReqVO.getKnowledgeId());
         }
 
         // 2. 更新对话信息
