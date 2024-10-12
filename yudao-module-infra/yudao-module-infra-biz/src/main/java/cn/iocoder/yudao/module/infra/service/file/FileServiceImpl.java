@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.infra.enums.ErrorCodeConstants.FILE_NOT_EXISTS;
+import static cn.iocoder.yudao.module.infra.enums.ErrorCodeConstants.FILE_PATH_EXISTS;
 
 /**
  * 文件 Service 实现类
@@ -46,6 +47,9 @@ public class FileServiceImpl implements FileService {
         String type = FileTypeUtils.getMineType(content, name);
         if (StrUtil.isEmpty(path)) {
             path = FileUtils.generatePath(content, name);
+        }
+        if (isFileExists(path)) {
+            throw exception(FILE_PATH_EXISTS);
         }
         // 如果 name 为空，则使用 path 填充
         if (StrUtil.isEmpty(name)) {
@@ -96,6 +100,10 @@ public class FileServiceImpl implements FileService {
             throw exception(FILE_NOT_EXISTS);
         }
         return fileDO;
+    }
+
+    private boolean isFileExists(String path) {
+        return fileMapper.selectCount(FileDO::getPath, path) > 0;
     }
 
     @Override

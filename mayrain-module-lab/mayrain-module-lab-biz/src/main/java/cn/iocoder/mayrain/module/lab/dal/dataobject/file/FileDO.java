@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.infra.dal.dataobject.file;
+package cn.iocoder.mayrain.module.lab.dal.dataobject.file;
 
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
@@ -29,7 +29,7 @@ public class FileDO extends TenantBaseDO {
     /**
      * 配置编号
      *
-     * 关联 {@link FileConfigDO#getId()}
+     * 关联
      */
     private Long configId;
     /**
