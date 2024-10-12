@@ -3,8 +3,8 @@ package cn.iocoder.yudao.module.product.service.category;
 import cn.iocoder.yudao.module.product.controller.admin.category.vo.ProductCategoryListReqVO;
 import cn.iocoder.yudao.module.product.controller.admin.category.vo.ProductCategorySaveReqVO;
 import cn.iocoder.yudao.module.product.dal.dataobject.category.ProductCategoryDO;
-import jakarta.validation.Valid;
 
+import javax.validation.Valid;
 import java.util.Collection;
 import java.util.List;
 
@@ -87,6 +87,7 @@ public interface ProductCategoryService {
      * 校验商品分类是否有效。如下情况，视为无效：
      * 1. 商品分类编号不存在
      * 2. 商品分类被禁用
+     * 3. 商品分类层级校验，必须使用第二级的商品分类及以下
      *
      * @param ids 商品分类编号数组
      */

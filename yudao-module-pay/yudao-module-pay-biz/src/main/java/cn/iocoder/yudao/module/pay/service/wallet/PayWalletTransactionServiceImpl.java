@@ -12,11 +12,11 @@ import cn.iocoder.yudao.module.pay.dal.mysql.wallet.PayWalletTransactionMapper;
 import cn.iocoder.yudao.module.pay.dal.redis.no.PayNoRedisDAO;
 import cn.iocoder.yudao.module.pay.enums.wallet.PayWalletBizTypeEnum;
 import cn.iocoder.yudao.module.pay.service.wallet.bo.WalletTransactionCreateReqBO;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 
 import static cn.iocoder.yudao.module.pay.controller.app.wallet.vo.transaction.AppPayWalletTransactionPageReqVO.TYPE_EXPENSE;
@@ -87,8 +87,6 @@ public class PayWalletTransactionServiceImpl implements PayWalletTransactionServ
     @Override
     public AppPayWalletTransactionSummaryRespVO getWalletTransactionSummary(Long userId, Integer userType, LocalDateTime[] createTime) {
         PayWalletDO wallet = payWalletService.getOrCreateWallet(userId, userType);
-        AppPayWalletTransactionSummaryRespVO summary = new AppPayWalletTransactionSummaryRespVO()
-                .setTotalExpense(1).setTotalIncome(100);
         return new AppPayWalletTransactionSummaryRespVO()
                 .setTotalExpense(payWalletTransactionMapper.selectPriceSum(wallet.getId(), TYPE_EXPENSE, createTime))
                 .setTotalIncome(payWalletTransactionMapper.selectPriceSum(wallet.getId(), TYPE_INCOME, createTime));

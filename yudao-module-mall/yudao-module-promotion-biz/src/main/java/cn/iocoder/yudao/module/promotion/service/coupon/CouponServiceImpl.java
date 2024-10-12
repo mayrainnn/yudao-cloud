@@ -19,12 +19,12 @@ import cn.iocoder.yudao.module.promotion.dal.mysql.coupon.CouponMapper;
 import cn.iocoder.yudao.module.promotion.enums.coupon.CouponStatusEnum;
 import cn.iocoder.yudao.module.promotion.enums.coupon.CouponTakeTypeEnum;
 import cn.iocoder.yudao.module.promotion.enums.coupon.CouponTemplateValidityTypeEnum;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -279,7 +279,7 @@ public class CouponServiceImpl implements CouponService {
             }
         }
         // 校验领取方式
-        if (ObjectUtil.notEqual(couponTemplate.getTakeType(), takeType.getValue())) {
+        if (ObjectUtil.notEqual(couponTemplate.getTakeType(), takeType.getType())) {
             throw exception(COUPON_TEMPLATE_CANNOT_TAKE);
         }
     }

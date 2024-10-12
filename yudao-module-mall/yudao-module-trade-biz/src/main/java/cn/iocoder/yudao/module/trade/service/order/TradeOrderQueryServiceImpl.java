@@ -26,7 +26,7 @@ import cn.iocoder.yudao.module.trade.service.delivery.DeliveryExpressService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
+import javax.annotation.Resource;
 import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -215,7 +215,7 @@ public class TradeOrderQueryServiceImpl implements TradeOrderQueryService {
      * @return 物流轨迹
      */
     @Cacheable(cacheNames = RedisKeyConstants.EXPRESS_TRACK, key = "#code + '-' + #logisticsNo + '-' + #receiverMobile",
-            condition = "#result != null && #result.length() > 0")
+            unless = "#result == null")
     public List<ExpressTrackRespDTO> getExpressTrackList(String code, String logisticsNo, String receiverMobile) {
         return expressClientFactory.getDefaultExpressClient().getExpressTrackList(new ExpressTrackQueryReqDTO()
                 .setExpressCode(code).setLogisticsNo(logisticsNo).setPhone(receiverMobile));

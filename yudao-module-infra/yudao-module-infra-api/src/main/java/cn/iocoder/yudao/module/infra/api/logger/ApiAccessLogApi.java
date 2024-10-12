@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 
 @FeignClient(name = ApiConstants.NAME) // TODO 芋艿：fallbackFactory =
 @Tag(name = "RPC 服务 - API 访问日志")

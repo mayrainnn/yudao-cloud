@@ -3,7 +3,9 @@ package cn.iocoder.yudao.module.bpm.service.message;
 import cn.iocoder.yudao.module.bpm.service.message.dto.BpmMessageSendWhenProcessInstanceApproveReqDTO;
 import cn.iocoder.yudao.module.bpm.service.message.dto.BpmMessageSendWhenProcessInstanceRejectReqDTO;
 import cn.iocoder.yudao.module.bpm.service.message.dto.BpmMessageSendWhenTaskCreatedReqDTO;
-import jakarta.validation.Valid;
+import cn.iocoder.yudao.module.bpm.service.message.dto.BpmMessageSendWhenTaskTimeoutReqDTO;
+
+import javax.validation.Valid;
 
 /**
  * BPM 消息 Service 接口
@@ -34,5 +36,12 @@ public interface BpmMessageService {
      * @param reqDTO 发送信息
      */
     void sendMessageWhenTaskAssigned(@Valid BpmMessageSendWhenTaskCreatedReqDTO reqDTO);
+
+    /**
+     * 发送任务审批超时的消息
+     *
+     * @param reqDTO 发送信息
+     */
+    void sendMessageWhenTaskTimeout(@Valid BpmMessageSendWhenTaskTimeoutReqDTO reqDTO);
 
 }

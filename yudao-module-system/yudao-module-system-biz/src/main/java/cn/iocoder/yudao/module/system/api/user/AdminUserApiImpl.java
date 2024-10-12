@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.datapermission.core.annotation.DataPermission;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.dal.dataobject.dept.DeptDO;
 import cn.iocoder.yudao.module.system.dal.dataobject.user.AdminUserDO;
@@ -12,7 +13,7 @@ import cn.iocoder.yudao.module.system.service.user.AdminUserService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.annotation.Resource;
+import javax.annotation.Resource;
 
 import java.util.*;
 
@@ -63,6 +64,7 @@ public class AdminUserApiImpl implements AdminUserApi {
     }
 
     @Override
+    @DataPermission(enable = false) // 禁用数据权限。原因是，一般基于指定 id 的 API 查询，都是数据拼接为主
     public CommonResult<List<AdminUserRespDTO>> getUserList(Collection<Long> ids) {
         List<AdminUserDO> users = userService.getUserList(ids);
         return success(BeanUtils.toBean(users, AdminUserRespDTO.class));

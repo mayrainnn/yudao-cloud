@@ -2,7 +2,6 @@ package cn.iocoder.yudao.module.ai.service.model;
 
 import cn.iocoder.yudao.framework.ai.core.enums.AiPlatformEnum;
 import cn.iocoder.yudao.framework.ai.core.factory.AiModelFactory;
-import cn.iocoder.yudao.framework.ai.core.factory.AiVectorStoreFactory;
 import cn.iocoder.yudao.framework.ai.core.model.midjourney.api.MidjourneyApi;
 import cn.iocoder.yudao.framework.ai.core.model.suno.api.SunoApi;
 import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
@@ -12,7 +11,6 @@ import cn.iocoder.yudao.module.ai.controller.admin.model.vo.apikey.AiApiKeyPageR
 import cn.iocoder.yudao.module.ai.controller.admin.model.vo.apikey.AiApiKeySaveReqVO;
 import cn.iocoder.yudao.module.ai.dal.dataobject.model.AiApiKeyDO;
 import cn.iocoder.yudao.module.ai.dal.mysql.model.AiApiKeyMapper;
-import jakarta.annotation.Resource;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.image.ImageModel;
@@ -20,6 +18,7 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -39,8 +38,6 @@ public class AiApiKeyServiceImpl implements AiApiKeyService {
 
     @Resource
     private AiModelFactory modelFactory;
-    @Resource
-    private AiVectorStoreFactory vectorFactory;
 
     @Override
     public Long createApiKey(AiApiKeySaveReqVO createReqVO) {
@@ -149,7 +146,8 @@ public class AiApiKeyServiceImpl implements AiApiKeyService {
     public VectorStore getOrCreateVectorStore(Long id) {
         AiApiKeyDO apiKey = validateApiKey(id);
         AiPlatformEnum platform = AiPlatformEnum.validatePlatform(apiKey.getPlatform());
-        return vectorFactory.getOrCreateVectorStore(getEmbeddingModel(id), platform, apiKey.getApiKey(), apiKey.getUrl());
+        // 创建或获取 VectorStore 对象
+        return modelFactory.getOrCreateVectorStore(getEmbeddingModel(id), platform, apiKey.getApiKey(), apiKey.getUrl());
     }
 
 }

@@ -16,7 +16,6 @@ import cn.iocoder.yudao.module.bpm.service.definition.BpmProcessDefinitionServic
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.repository.Deployment;
@@ -28,12 +27,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
+import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
 
 @Tag(name = "管理后台 - 流程定义")
 @RestController
@@ -79,14 +80,23 @@ public class BpmProcessDefinitionController {
     @Parameter(name = "suspensionState", description = "挂起状态", required = true, example = "1") // 参见 Flowable SuspensionState 枚举
     public CommonResult<List<BpmProcessDefinitionRespVO>> getProcessDefinitionList(
             @RequestParam("suspensionState") Integer suspensionState) {
+        // 1.1 获得开启的流程定义
         List<ProcessDefinition> list = processDefinitionService.getProcessDefinitionListBySuspensionState(suspensionState);
         if (CollUtil.isEmpty(list)) {
             return success(Collections.emptyList());
         }
-
-        // 获得 BpmProcessDefinitionInfoDO Map
+        // 1.2 移除不可见的流程定义
         Map<String, BpmProcessDefinitionInfoDO> processDefinitionMap = processDefinitionService.getProcessDefinitionInfoMap(
                 convertSet(list, ProcessDefinition::getId));
+        Long userId = getLoginUserId();
+        list.removeIf(processDefinition -> {
+            BpmProcessDefinitionInfoDO processDefinitionInfo = processDefinitionMap.get(processDefinition.getId());
+            return processDefinitionInfo == null // 不存在
+                    || Boolean.FALSE.equals(processDefinitionInfo.getVisible()) // visible 不可见
+                    || !processDefinitionService.canUserStartProcessDefinition(processDefinitionInfo, userId); // 无权限发起
+        });
+
+        // 2. 拼接 VO 返回
         return success(BpmProcessDefinitionConvert.INSTANCE.buildProcessDefinitionList(
                 list, null, processDefinitionMap, null, null));
     }
