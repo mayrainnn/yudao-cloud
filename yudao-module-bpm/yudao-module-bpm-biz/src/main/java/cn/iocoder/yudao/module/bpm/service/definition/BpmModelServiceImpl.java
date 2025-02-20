@@ -1,20 +1,38 @@
 package cn.iocoder.yudao.module.bpm.service.definition;
 
+<<<<<<< HEAD
+=======
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.ObjUtil;
+>>>>>>> master-jdk17
 import cn.hutool.core.util.StrUtil;
-import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.json.JsonUtils;
-import cn.iocoder.yudao.framework.common.util.object.PageUtils;
 import cn.iocoder.yudao.framework.common.util.validation.ValidationUtils;
+<<<<<<< HEAD
 import cn.iocoder.yudao.module.bpm.controller.admin.definition.vo.model.BpmModelCreateReqVO;
 import cn.iocoder.yudao.module.bpm.controller.admin.definition.vo.model.BpmModelPageReqVO;
 import cn.iocoder.yudao.module.bpm.controller.admin.definition.vo.model.BpmModelUpdateReqVO;
+=======
+import cn.iocoder.yudao.module.bpm.controller.admin.definition.vo.model.BpmModelMetaInfoVO;
+import cn.iocoder.yudao.module.bpm.controller.admin.definition.vo.model.BpmModelSaveReqVO;
+import cn.iocoder.yudao.module.bpm.controller.admin.definition.vo.model.simple.BpmSimpleModelNodeVO;
+import cn.iocoder.yudao.module.bpm.controller.admin.definition.vo.model.simple.BpmSimpleModelUpdateReqVO;
+>>>>>>> master-jdk17
 import cn.iocoder.yudao.module.bpm.convert.definition.BpmModelConvert;
 import cn.iocoder.yudao.module.bpm.dal.dataobject.definition.BpmFormDO;
 import cn.iocoder.yudao.module.bpm.enums.definition.BpmModelFormTypeEnum;
+import cn.iocoder.yudao.module.bpm.enums.definition.BpmModelTypeEnum;
+import cn.iocoder.yudao.module.bpm.enums.task.BpmReasonEnum;
 import cn.iocoder.yudao.module.bpm.framework.flowable.core.candidate.BpmTaskCandidateInvoker;
 import cn.iocoder.yudao.module.bpm.framework.flowable.core.util.BpmnModelUtils;
 import cn.iocoder.yudao.module.bpm.framework.flowable.core.util.FlowableUtils;
+<<<<<<< HEAD
 import cn.iocoder.yudao.module.bpm.service.definition.dto.BpmModelMetaInfoRespDTO;
+=======
+import cn.iocoder.yudao.module.bpm.framework.flowable.core.util.SimpleModelUtils;
+import cn.iocoder.yudao.module.bpm.service.task.BpmProcessInstanceCopyService;
+>>>>>>> master-jdk17
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -22,24 +40,31 @@ import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.bpmn.model.StartEvent;
 import org.flowable.bpmn.model.UserTask;
 import org.flowable.common.engine.impl.db.SuspensionState;
+import org.flowable.engine.HistoryService;
 import org.flowable.engine.RepositoryService;
+import org.flowable.engine.RuntimeService;
+import org.flowable.engine.TaskService;
+import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.repository.Model;
 import org.flowable.engine.repository.ModelQuery;
 import org.flowable.engine.repository.ProcessDefinition;
+import org.flowable.engine.runtime.ProcessInstance;
+import org.flowable.task.api.Task;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
 import static cn.iocoder.yudao.module.bpm.enums.ErrorCodeConstants.*;
 
 /**
- * Flowable流程模型实现
- * 主要进行 Flowable {@link Model} 的维护
+ * 流程模型实现：主要进行 Flowable {@link Model} 的维护
  *
  * @author yunlongn
  * @author 芋道源码
@@ -60,28 +85,23 @@ public class BpmModelServiceImpl implements BpmModelService {
     @Resource
     private BpmTaskCandidateInvoker taskCandidateInvoker;
 
+    @Resource
+    private HistoryService historyService;
+    @Resource
+    private RuntimeService runtimeService;
+    @Resource
+    private TaskService taskService;
+    @Resource
+    private BpmProcessInstanceCopyService processInstanceCopyService;
+
     @Override
-    public PageResult<Model> getModelPage(BpmModelPageReqVO pageVO) {
+    public List<Model> getModelList(String name) {
         ModelQuery modelQuery = repositoryService.createModelQuery();
+        if (StrUtil.isNotEmpty(name)) {
+            modelQuery.modelNameLike("%" + name + "%");
+        }
         modelQuery.modelTenantId(FlowableUtils.getTenantId());
-        if (StrUtil.isNotBlank(pageVO.getKey())) {
-            modelQuery.modelKey(pageVO.getKey());
-        }
-        if (StrUtil.isNotBlank(pageVO.getName())) {
-            modelQuery.modelNameLike("%" + pageVO.getName() + "%"); // 模糊匹配
-        }
-        if (StrUtil.isNotBlank(pageVO.getCategory())) {
-            modelQuery.modelCategory(pageVO.getCategory());
-        }
-        // 执行查询
-        long count = modelQuery.count();
-        if (count == 0) {
-            return PageResult.empty(count);
-        }
-        List<Model> models = modelQuery
-                .orderByCreateTime().desc()
-                .listPage(PageUtils.getStart(pageVO), pageVO.getPageSize());
-        return new PageResult<>(models, count);
+        return modelQuery.list();
     }
 
     @Override
@@ -96,32 +116,130 @@ public class BpmModelServiceImpl implements BpmModelService {
             throw exception(MODEL_KEY_EXISTS, createReqVO.getKey());
         }
 
+<<<<<<< HEAD
         // 创建流程定义
+=======
+        // 2. 创建 Model 对象
+        createReqVO.setSort(System.currentTimeMillis()); // 使用当前时间，作为排序
+>>>>>>> master-jdk17
         Model model = repositoryService.newModel();
         BpmModelConvert.INSTANCE.copyToCreateModel(model, createReqVO);
         model.setTenantId(FlowableUtils.getTenantId());
+<<<<<<< HEAD
         // 保存流程定义
         repositoryService.saveModel(model);
         // 保存 BPMN XML
         saveModelBpmnXml(model, bpmnXml);
+=======
+
+        // 3. 保存模型
+        saveModel(model, createReqVO);
+>>>>>>> master-jdk17
         return model.getId();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class) // 因为进行多个操作，所以开启事务
+<<<<<<< HEAD
     public void updateModel(@Valid BpmModelUpdateReqVO updateReqVO) {
         // 校验流程模型存在
         Model model = getModel(updateReqVO.getId());
+=======
+    public void updateModel(Long userId, BpmModelSaveReqVO updateReqVO) {
+        // 1. 校验流程模型存在
+        Model model = validateModelManager(updateReqVO.getId(), userId);
+
+        // 2. 填充 Model 信息
+        BpmModelConvert.INSTANCE.copyToModel(model, updateReqVO);
+
+        // 3. 保存模型
+        saveModel(model, updateReqVO);
+    }
+
+    /**
+     * 保存模型的基本信息、流程图
+     *
+     * @param model 模型
+     * @param saveReqVO 保存信息
+     */
+    private void saveModel(Model model, BpmModelSaveReqVO saveReqVO) {
+        // 1. 保存模型的基础信息
+        repositoryService.saveModel(model);
+
+        // 2. 保存流程图
+        if (ObjUtil.equals(BpmModelTypeEnum.BPMN.getType(), saveReqVO.getType())
+                && StrUtil.isNotEmpty(saveReqVO.getBpmnXml())) {
+            updateModelBpmnXml(model.getId(), saveReqVO.getBpmnXml());
+        } else if (ObjUtil.equals(BpmModelTypeEnum.SIMPLE.getType(), saveReqVO.getType())
+                && saveReqVO.getSimpleModel() != null) {
+            // JSON 转换成 bpmnModel
+            BpmnModel bpmnModel = SimpleModelUtils.buildBpmnModel(model.getKey(), model.getName(),
+                    saveReqVO.getSimpleModel());
+            // 保存 Bpmn XML
+            updateModelBpmnXml(model.getId(), BpmnModelUtils.getBpmnXml(bpmnModel));
+            // 保存 JSON 数据
+            updateModelSimpleJson(model.getId(), saveReqVO.getSimpleModel());
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateModelSortBatch(Long userId, List<String> ids) {
+        // 1.1 校验流程模型存在
+        List<Model> models = repositoryService.createModelQuery()
+                .modelTenantId(FlowableUtils.getTenantId()).list();
+        models.removeIf(model -> !ids.contains(model.getId()));
+        if (ids.size() != models.size()) {
+            throw exception(MODEL_NOT_EXISTS);
+        }
+        Map<String, Model> modelMap = convertMap(models, Model::getId);
+        // 1.2 校验是否为管理员
+        ids.forEach(id -> validateModelManager(id, userId));
+
+        // 保存排序
+        long sort = System.currentTimeMillis(); // 使用时间戳 - i 作为排序
+        for (int i = ids.size() - 1; i > 0; i--) {
+            Model model = modelMap.get(ids.get(i));
+            // 更新模型
+            BpmModelMetaInfoVO metaInfo = BpmModelConvert.INSTANCE.parseMetaInfo(model).setSort(sort);
+            model.setMetaInfo(JsonUtils.toJsonString(metaInfo));
+            repositoryService.saveModel(model);
+            // 更新排序
+            processDefinitionService.updateProcessDefinitionSortByModelId(model.getId(), sort);
+            sort--;
+        }
+    }
+
+    private Model validateModelExists(String id) {
+        Model model = repositoryService.getModel(id);
+>>>>>>> master-jdk17
         if (model == null) {
             throw exception(MODEL_NOT_EXISTS);
         }
 
+<<<<<<< HEAD
         // 修改流程定义
         BpmModelConvert.INSTANCE.copyToUpdateModel(model, updateReqVO);
         // 更新模型
         repositoryService.saveModel(model);
         // 更新 BPMN XML
         saveModelBpmnXml(model, updateReqVO.getBpmnXml());
+=======
+    /**
+     * 校验是否有流程模型的管理权限
+     *
+     * @param id     流程模型编号
+     * @param userId 用户编号
+     * @return 流程模型
+     */
+    private Model validateModelManager(String id, Long userId) {
+        Model model = validateModelExists(id);
+        BpmModelMetaInfoVO metaInfo = BpmModelConvert.INSTANCE.parseMetaInfo(model);
+        if (metaInfo == null || !CollUtil.contains(metaInfo.getManagerUserIds(), userId)) {
+            throw exception(MODEL_UPDATE_FAIL_NOT_MANAGER, model.getName());
+        }
+        return model;
+>>>>>>> master-jdk17
     }
 
     @Override
@@ -140,9 +258,18 @@ public class BpmModelServiceImpl implements BpmModelService {
         BpmFormDO form = validateFormConfig(metaInfo);
         // 1.4 校验任务分配规则已配置
         taskCandidateInvoker.validateBpmnConfig(bpmnBytes);
+<<<<<<< HEAD
 
         // 2.1 创建流程定义
         String definitionId = processDefinitionService.createProcessDefinition(model, metaInfo, bpmnBytes, form);
+=======
+        // 1.5 获取仿钉钉流程设计器模型数据
+        String simpleJson = getModelSimpleJson(model.getId());
+
+        // 2.1 创建流程定义
+        String definitionId = processDefinitionService.createProcessDefinition(model, metaInfo, bpmnBytes, simpleJson,
+                form);
+>>>>>>> master-jdk17
 
         // 2.2 将老的流程定义进行挂起。也就是说，只有最新部署的流程定义，才可以发起任务。
         updateProcessDefinitionSuspended(model.getDeploymentId());
@@ -187,14 +314,47 @@ public class BpmModelServiceImpl implements BpmModelService {
     }
 
     @Override
+<<<<<<< HEAD
     public void updateModelState(String id, Integer state) {
+=======
+    public void cleanModel(Long userId, String id) {
+        // 1. 校验流程模型存在
+        Model model = validateModelManager(id, userId);
+
+        // 2. 清理所有流程数据
+        // 2.1 先取消所有正在运行的流程
+        List<ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery()
+                .processDefinitionKey(model.getKey()).list();
+        processInstances.forEach(processInstance -> {
+            runtimeService.deleteProcessInstance(processInstance.getId(),
+                    BpmReasonEnum.CANCEL_BY_SYSTEM.getReason());
+            historyService.deleteHistoricProcessInstance(processInstance.getId());
+            processInstanceCopyService.deleteProcessInstanceCopy(processInstance.getId());
+        });
+        // 2.2 再从历史中删除所有相关的流程数据
+        List<HistoricProcessInstance> historicProcessInstances = historyService.createHistoricProcessInstanceQuery()
+                .processDefinitionKey(model.getKey()).list();
+        historicProcessInstances.forEach(historicProcessInstance -> {
+            historyService.deleteHistoricProcessInstance(historicProcessInstance.getId());
+            processInstanceCopyService.deleteProcessInstanceCopy(historicProcessInstance.getId());
+        });
+        // 2.3 清理所有 Task
+        List<Task> tasks = taskService.createTaskQuery()
+                .processDefinitionKey(model.getKey()).list();
+        tasks.forEach(task -> taskService.deleteTask(task.getId(),BpmReasonEnum.CANCEL_BY_PROCESS_CLEAN.getReason()));
+    }
+
+    @Override
+    public void updateModelState(Long userId, String id, Integer state) {
+>>>>>>> master-jdk17
         // 1.1 校验流程模型存在
         Model model = getModel(id);
         if (model == null) {
             throw exception(MODEL_NOT_EXISTS);
         }
         // 1.2 校验流程定义存在
-        ProcessDefinition definition = processDefinitionService.getProcessDefinitionByDeploymentId(model.getDeploymentId());
+        ProcessDefinition definition = processDefinitionService
+                .getProcessDefinitionByDeploymentId(model.getDeploymentId());
         if (definition == null) {
             throw exception(PROCESS_DEFINITION_NOT_EXISTS);
         }
@@ -208,6 +368,30 @@ public class BpmModelServiceImpl implements BpmModelService {
         return repositoryService.getBpmnModel(processDefinitionId);
     }
 
+<<<<<<< HEAD
+=======
+    @Override
+    public BpmSimpleModelNodeVO getSimpleModel(String modelId) {
+        Model model = validateModelExists(modelId);
+        // 通过 ACT_RE_MODEL 表 EDITOR_SOURCE_EXTRA_VALUE_ID_ ，获取仿钉钉快搭模型的 JSON 数据
+        String json = getModelSimpleJson(model.getId());
+        return JsonUtils.parseObject(json, BpmSimpleModelNodeVO.class);
+    }
+
+    @Override
+    public void updateSimpleModel(Long userId, BpmSimpleModelUpdateReqVO reqVO) {
+        // 1. 校验流程模型存在
+        Model model = validateModelManager(reqVO.getId(), userId);
+
+        // 2.1 JSON 转换成 bpmnModel
+        BpmnModel bpmnModel = SimpleModelUtils.buildBpmnModel(model.getKey(), model.getName(), reqVO.getSimpleModel());
+        // 2.2 保存 Bpmn XML
+        updateModelBpmnXml(model.getId(), BpmnModelUtils.getBpmnXml(bpmnModel));
+        // 2.3 保存 JSON 数据
+        updateModelSimpleJson(model.getId(), reqVO.getSimpleModel());
+    }
+
+>>>>>>> master-jdk17
     /**
      * 校验流程表单已配置
      *
@@ -229,7 +413,8 @@ public class BpmModelServiceImpl implements BpmModelService {
             }
             return form;
         } else {
-            if (StrUtil.isEmpty(metaInfo.getFormCustomCreatePath()) || StrUtil.isEmpty(metaInfo.getFormCustomViewPath())) {
+            if (StrUtil.isEmpty(metaInfo.getFormCustomCreatePath())
+                    || StrUtil.isEmpty(metaInfo.getFormCustomViewPath())) {
                 throw exception(MODEL_DEPLOY_FAIL_FORM_NOT_CONFIG);
             }
             return null;
@@ -240,7 +425,28 @@ public class BpmModelServiceImpl implements BpmModelService {
         if (StrUtil.isEmpty(bpmnXml)) {
             return;
         }
+<<<<<<< HEAD
         repositoryService.addModelEditorSource(model.getId(), StrUtil.utf8Bytes(bpmnXml));
+=======
+        repositoryService.addModelEditorSource(id, StrUtil.utf8Bytes(bpmnXml));
+    }
+
+    @SuppressWarnings("JavaExistingMethodCanBeUsed")
+    private String getModelSimpleJson(String id) {
+        byte[] bytes = repositoryService.getModelEditorSourceExtra(id);
+        if (ArrayUtil.isEmpty(bytes)) {
+            return null;
+        }
+        return StrUtil.utf8Str(bytes);
+    }
+
+    private void updateModelSimpleJson(String id, BpmSimpleModelNodeVO node) {
+        if (node == null) {
+            return;
+        }
+        byte[] bytes = JsonUtils.toJsonByte(node);
+        repositoryService.addModelEditorSourceExtra(id, bytes);
+>>>>>>> master-jdk17
     }
 
     /**
@@ -258,7 +464,8 @@ public class BpmModelServiceImpl implements BpmModelService {
         if (oldDefinition == null) {
             return;
         }
-        processDefinitionService.updateProcessDefinitionState(oldDefinition.getId(), SuspensionState.SUSPENDED.getStateCode());
+        processDefinitionService.updateProcessDefinitionState(oldDefinition.getId(),
+                SuspensionState.SUSPENDED.getStateCode());
     }
 
     private Model getModelByKey(String key) {

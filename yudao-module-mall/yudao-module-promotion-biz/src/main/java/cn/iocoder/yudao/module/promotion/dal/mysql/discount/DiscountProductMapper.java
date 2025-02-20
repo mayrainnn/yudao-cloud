@@ -30,6 +30,7 @@ public interface DiscountProductMapper extends BaseMapperX<DiscountProductDO> {
         return selectList(DiscountProductDO::getActivityId, activityIds);
     }
 
+<<<<<<< HEAD
     // TODO @zhangshuai：逻辑里，尽量避免写 join 语句哈，你可以看看这个查询，有什么办法优化？目前的一个思路，是分 2 次查询，性能也是 ok 的
     List<DiscountProductDO> getMatchDiscountProductList(@Param("skuIds") Collection<Long> skuIds);
 
@@ -46,6 +47,24 @@ public interface DiscountProductMapper extends BaseMapperX<DiscountProductDO> {
                 .in("spu_id", spuIds)
                 .eq("activity_status", status)
                 .groupBy("spu_id"));
+=======
+    default void updateByActivityId(DiscountProductDO discountProductDO) {
+        update(discountProductDO, new LambdaUpdateWrapper<DiscountProductDO>()
+                .eq(DiscountProductDO::getActivityId, discountProductDO.getActivityId()));
+    }
+
+    default void deleteByActivityId(Long activityId) {
+        delete(DiscountProductDO::getActivityId, activityId);
+    }
+
+    default List<DiscountProductDO> selectListBySkuIdsAndStatusAndNow(Collection<Long> skuIds, Integer status) {
+        LocalDateTime now = LocalDateTime.now();
+        return selectList(new LambdaQueryWrapperX<DiscountProductDO>()
+                .in(DiscountProductDO::getSkuId, skuIds)
+                .eq(DiscountProductDO::getActivityStatus,status)
+                .lt(DiscountProductDO::getActivityStartTime, now)
+                .gt(DiscountProductDO::getActivityEndTime, now));
+>>>>>>> master-jdk17
     }
 
 }

@@ -21,6 +21,14 @@ import java.util.Set;
 @Component
 public class BpmProcessInstanceEventListener extends AbstractFlowableEngineEventListener {
 
+<<<<<<< HEAD
+=======
+    public static final Set<FlowableEngineEventType> PROCESS_INSTANCE_EVENTS = ImmutableSet.<FlowableEngineEventType>builder()
+            .add(FlowableEngineEventType.PROCESS_COMPLETED)
+            .add(FlowableEngineEventType.PROCESS_CANCELLED)
+            .build();
+
+>>>>>>> master-jdk17
     @Resource
     @Lazy
     private BpmProcessInstanceService processInstanceService;
@@ -42,6 +50,12 @@ public class BpmProcessInstanceEventListener extends AbstractFlowableEngineEvent
     @Override
     protected void processCompleted(FlowableEngineEntityEvent event) {
         processInstanceService.updateProcessInstanceWhenApprove((ProcessInstance)event.getEntity());
+    }
+
+    @Override // 特殊情况：当跳转到 EndEvent 流程实例未结束, 会执行 deleteProcessInstance 方法
+    protected void processCancelled(FlowableCancelledEvent event) {
+        ProcessInstance processInstance = processInstanceService.getProcessInstance(event.getProcessInstanceId());
+        processInstanceService.processProcessInstanceCompleted(processInstance);
     }
 
 }

@@ -190,6 +190,7 @@ public class DiscountActivityServiceImpl implements DiscountActivityService {
 
     @Override
     public List<DiscountProductDO> getDiscountProductsByActivityId(Collection<Long> activityIds) {
+<<<<<<< HEAD
         return discountProductMapper.selectList("activity_id", activityIds);
     }
 
@@ -204,6 +205,20 @@ public class DiscountActivityServiceImpl implements DiscountActivityService {
         // 2. 查询活动详情
         return discountActivityMapper.selectListByIdsAndDateTimeLt(
                 convertSet(spuIdAndActivityIdMaps, map -> MapUtil.getLong(map, "activityId")), dateTime);
+=======
+        if (CollUtil.isEmpty(activityIds)) {
+            return CollUtil.newArrayList();
+        }
+        return discountProductMapper.selectList(DiscountProductDO::getActivityId, activityIds);
+    }
+
+    @Override
+    public List<DiscountProductDO> getMatchDiscountProductListBySkuIds(Collection<Long> skuIds) {
+        if (CollUtil.isEmpty(skuIds)) {
+            return CollUtil.newArrayList();
+        }
+        return discountProductMapper.selectListBySkuIdsAndStatusAndNow(skuIds, CommonStatusEnum.ENABLE.getStatus());
+>>>>>>> master-jdk17
     }
 
 }

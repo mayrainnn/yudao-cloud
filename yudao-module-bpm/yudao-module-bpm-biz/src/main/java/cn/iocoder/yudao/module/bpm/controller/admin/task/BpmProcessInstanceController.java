@@ -11,7 +11,6 @@ import cn.iocoder.yudao.module.bpm.controller.admin.task.vo.instance.BpmProcessI
 import cn.iocoder.yudao.module.bpm.convert.task.BpmProcessInstanceConvert;
 import cn.iocoder.yudao.module.bpm.dal.dataobject.definition.BpmCategoryDO;
 import cn.iocoder.yudao.module.bpm.dal.dataobject.definition.BpmProcessDefinitionInfoDO;
-import cn.iocoder.yudao.module.bpm.framework.flowable.core.util.BpmnModelUtils;
 import cn.iocoder.yudao.module.bpm.service.definition.BpmCategoryService;
 import cn.iocoder.yudao.module.bpm.service.definition.BpmProcessDefinitionService;
 import cn.iocoder.yudao.module.bpm.service.task.BpmProcessInstanceService;
@@ -78,8 +77,10 @@ public class BpmProcessInstanceController {
                 convertSet(pageResult.getList(), HistoricProcessInstance::getProcessDefinitionId));
         Map<String, BpmCategoryDO> categoryMap = categoryService.getCategoryMap(
                 convertSet(processDefinitionMap.values(), ProcessDefinition::getCategory));
+        Map<String, BpmProcessDefinitionInfoDO> processDefinitionInfoMap = processDefinitionService.getProcessDefinitionInfoMap(
+                convertSet(pageResult.getList(), HistoricProcessInstance::getProcessDefinitionId));
         return success(BpmProcessInstanceConvert.INSTANCE.buildProcessInstancePage(pageResult,
-                processDefinitionMap, categoryMap, taskMap, null, null));
+                processDefinitionMap, categoryMap, taskMap, null, null, processDefinitionInfoMap));
     }
 
     @GetMapping("/manager-page")
@@ -105,8 +106,10 @@ public class BpmProcessInstanceController {
                 convertSet(pageResult.getList(), processInstance -> NumberUtils.parseLong(processInstance.getStartUserId())));
         Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(
                 convertSet(userMap.values(), AdminUserRespDTO::getDeptId));
+        Map<String, BpmProcessDefinitionInfoDO> processDefinitionInfoMap = processDefinitionService.getProcessDefinitionInfoMap(
+                convertSet(pageResult.getList(), HistoricProcessInstance::getProcessDefinitionId));
         return success(BpmProcessInstanceConvert.INSTANCE.buildProcessInstancePage(pageResult,
-                processDefinitionMap, categoryMap, taskMap, userMap, deptMap));
+                processDefinitionMap, categoryMap, taskMap, userMap, deptMap, processDefinitionInfoMap));
     }
 
     @PostMapping("/create")
@@ -131,15 +134,13 @@ public class BpmProcessInstanceController {
                 processInstance.getProcessDefinitionId());
         BpmProcessDefinitionInfoDO processDefinitionInfo = processDefinitionService.getProcessDefinitionInfo(
                 processInstance.getProcessDefinitionId());
-        String bpmnXml = BpmnModelUtils.getBpmnXml(
-                processDefinitionService.getProcessDefinitionBpmnModel(processInstance.getProcessDefinitionId()));
         AdminUserRespDTO startUser = adminUserApi.getUser(NumberUtils.parseLong(processInstance.getStartUserId())).getCheckedData();
         DeptRespDTO dept = null;
         if (startUser != null && startUser.getDeptId() != null) {
             dept = deptApi.getDept(startUser.getDeptId()).getCheckedData();
         }
         return success(BpmProcessInstanceConvert.INSTANCE.buildProcessInstance(processInstance,
-                processDefinition, processDefinitionInfo, bpmnXml, startUser, dept));
+                processDefinition, processDefinitionInfo, startUser, dept));
     }
 
     @DeleteMapping("/cancel-by-start-user")
@@ -160,4 +161,22 @@ public class BpmProcessInstanceController {
         return success(true);
     }
 
+<<<<<<< HEAD
+=======
+    @GetMapping("/get-approval-detail")
+    @Operation(summary = "获得审批详情")
+    @Parameter(name = "id", description = "流程实例的编号", required = true)
+    @PreAuthorize("@ss.hasPermission('bpm:process-instance:query')")
+    public CommonResult<BpmApprovalDetailRespVO> getApprovalDetail(@Valid BpmApprovalDetailReqVO reqVO) {
+        return success(processInstanceService.getApprovalDetail(getLoginUserId(), reqVO));
+    }
+
+    @GetMapping("/get-bpmn-model-view")
+    @Operation(summary = "获取流程实例的 BPMN 模型视图", description = "在【流程详细】界面中，进行调用")
+    @Parameter(name = "id", description = "流程实例的编号", required = true)
+    public CommonResult<BpmProcessInstanceBpmnModelViewRespVO> getProcessInstanceBpmnModelView(@RequestParam(value = "id") String id) {
+        return success(processInstanceService.getProcessInstanceBpmnModelView(id));
+    }
+
+>>>>>>> master-jdk17
 }

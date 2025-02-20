@@ -47,14 +47,30 @@ public class BpmProcessInstanceCopyServiceImpl implements BpmProcessInstanceCopy
     private BpmProcessDefinitionService processDefinitionService;
 
     @Override
+<<<<<<< HEAD
     public void createProcessInstanceCopy(Collection<Long> userIds, String taskId) {
         // 1.1 校验任务存在
+=======
+    public void createProcessInstanceCopy(Collection<Long> userIds, String reason, String taskId) {
+>>>>>>> master-jdk17
         Task task = taskService.getTask(taskId);
         if (ObjectUtil.isNull(task)) {
             throw exception(ErrorCodeConstants.TASK_NOT_EXISTS);
         }
+<<<<<<< HEAD
         // 1.2 校验流程实例存在
         String processInstanceId = task.getProcessInstanceId();
+=======
+        // 执行抄送
+        createProcessInstanceCopy(userIds, reason,
+                task.getProcessInstanceId(), task.getTaskDefinitionKey(), task.getId(), task.getName());
+    }
+
+    @Override
+    public void createProcessInstanceCopy(Collection<Long> userIds, String reason, String processInstanceId,
+                                          String activityId, String activityName, String taskId) {
+        // 1.1 校验流程实例存在
+>>>>>>> master-jdk17
         ProcessInstance processInstance = processInstanceService.getProcessInstance(processInstanceId);
         if (processInstance == null) {
             throw exception(ErrorCodeConstants.PROCESS_INSTANCE_NOT_EXISTS);
@@ -68,9 +84,15 @@ public class BpmProcessInstanceCopyServiceImpl implements BpmProcessInstanceCopy
 
         // 2. 创建抄送流程
         List<BpmProcessInstanceCopyDO> copyList = convertList(userIds, userId -> new BpmProcessInstanceCopyDO()
-                .setUserId(userId).setStartUserId(Long.valueOf(processInstance.getStartUserId()))
+                .setUserId(userId).setReason(reason).setStartUserId(Long.valueOf(processInstance.getStartUserId()))
                 .setProcessInstanceId(processInstanceId).setProcessInstanceName(processInstance.getName())
+<<<<<<< HEAD
                 .setCategory(processDefinition.getCategory()).setTaskId(taskId).setTaskName(task.getName()));
+=======
+                .setCategory(processDefinition.getCategory()).setTaskId(taskId)
+                .setActivityId(activityId).setActivityName(activityName)
+                .setProcessDefinitionId(processInstance.getProcessDefinitionId()));
+>>>>>>> master-jdk17
         processInstanceCopyMapper.insertBatch(copyList);
     }
 
@@ -80,4 +102,12 @@ public class BpmProcessInstanceCopyServiceImpl implements BpmProcessInstanceCopy
         return processInstanceCopyMapper.selectPage(userId, pageReqVO);
     }
 
+<<<<<<< HEAD
+=======
+    @Override
+    public void deleteProcessInstanceCopy(String processInstanceId) {
+        processInstanceCopyMapper.deleteByProcessInstanceId(processInstanceId);
+    }
+
+>>>>>>> master-jdk17
 }

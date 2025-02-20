@@ -166,11 +166,34 @@ public class PayWalletServiceImpl implements  PayWalletService {
             log.error("[addWalletBalance]，用户钱包({})不存在.", walletId);
             throw exception(WALLET_NOT_FOUND);
         }
+<<<<<<< HEAD
         // 1.2 更新钱包金额
         switch (bizType) {
             case PAYMENT_REFUND: { // 退款更新
                 walletMapper.updateWhenConsumptionRefund(payWallet.getId(), price);
                 break;
+=======
+
+        // 2. 加锁，更新钱包余额（目的：避免钱包流水的并发更新时，余额变化不连贯）
+        return lockRedisDAO.lock(walletId, UPDATE_TIMEOUT_MILLIS, () -> {
+            // 3. 更新钱包金额
+            switch (bizType) {
+                case PAYMENT_REFUND: { // 退款更新
+                    walletMapper.updateWhenConsumptionRefund(payWallet.getId(), price);
+                    break;
+                }
+                case RECHARGE: { // 充值更新
+                    walletMapper.updateWhenRecharge(payWallet.getId(), price);
+                    break;
+                }
+                case UPDATE_BALANCE: // 更新余额
+                case BROKERAGE_WITHDRAW: // 分佣提现
+                    walletMapper.updateWhenAdd(payWallet.getId(), price);
+                    break;
+                default: {
+                    throw new UnsupportedOperationException("待实现：" + bizType);
+                }
+>>>>>>> master-jdk17
             }
             case RECHARGE: { // 充值更新
                 walletMapper.updateWhenRecharge(payWallet.getId(), price);
@@ -185,11 +208,20 @@ public class PayWalletServiceImpl implements  PayWalletService {
             }
         }
 
+<<<<<<< HEAD
         // 2. 生成钱包流水
         WalletTransactionCreateReqBO transactionCreateReqBO = new WalletTransactionCreateReqBO()
                 .setWalletId(payWallet.getId()).setPrice(price).setBalance(payWallet.getBalance() + price)
                 .setBizId(bizId).setBizType(bizType.getType()).setTitle(bizType.getDescription());
         return walletTransactionService.createWalletTransaction(transactionCreateReqBO);
+=======
+            // 4. 生成钱包流水
+            WalletTransactionCreateReqBO transactionCreateReqBO = new WalletTransactionCreateReqBO()
+                    .setWalletId(payWallet.getId()).setPrice(price).setBalance(payWallet.getBalance() + price)
+                    .setBizId(bizId).setBizType(bizType.getType()).setTitle(bizType.getDescription());
+            return walletTransactionService.createWalletTransaction(transactionCreateReqBO);
+        });
+>>>>>>> master-jdk17
     }
 
     @Override

@@ -105,8 +105,13 @@ public class BpmProcessDefinitionServiceImpl implements BpmProcessDefinitionServ
     }
 
     @Override
+<<<<<<< HEAD
     public String createProcessDefinition(Model model, BpmModelMetaInfoRespDTO modelMetaInfo,
                                           byte[] bpmnBytes, BpmFormDO form) {
+=======
+    public String createProcessDefinition(Model model, BpmModelMetaInfoVO modelMetaInfo,
+                                          byte[] bpmnBytes, String simpleJson, BpmFormDO form) {
+>>>>>>> master-jdk17
         // 创建 Deployment 部署
         Deployment deploy = repositoryService.createDeployment()
                 .key(model.getKey()).name(model.getName()).category(model.getCategory())
@@ -131,7 +136,13 @@ public class BpmProcessDefinitionServiceImpl implements BpmProcessDefinitionServ
 
         // 插入拓展表
         BpmProcessDefinitionInfoDO definitionDO = BeanUtils.toBean(modelMetaInfo, BpmProcessDefinitionInfoDO.class)
+<<<<<<< HEAD
                 .setModelId(model.getId()).setProcessDefinitionId(definition.getId());
+=======
+                .setModelId(model.getId()).setProcessDefinitionId(definition.getId())
+                .setModelType(modelMetaInfo.getType()).setSimpleModel(simpleJson);
+
+>>>>>>> master-jdk17
         if (form != null) {
             definitionDO.setFormFields(form.getFields()).setFormConf(form.getConf());
         }
@@ -154,6 +165,11 @@ public class BpmProcessDefinitionServiceImpl implements BpmProcessDefinitionServ
             return;
         }
         log.error("[updateProcessDefinitionState][流程定义({}) 修改未知状态({})]", id, state);
+    }
+
+    @Override
+    public void updateProcessDefinitionSortByModelId(String modelId, Long sort) {
+        processDefinitionMapper.updateByModelId(modelId, new BpmProcessDefinitionInfoDO().setSort(sort));
     }
 
     @Override

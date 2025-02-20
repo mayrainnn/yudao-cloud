@@ -55,7 +55,14 @@ public class BpmUserTaskActivityBehavior extends UserTaskActivityBehavior {
 
         // 情况二，如果非多实例的任务，则计算任务处理人
         // 第一步，先计算可处理该任务的处理人们
+<<<<<<< HEAD
         Set<Long> candidateUserIds = taskCandidateInvoker.calculateUsers(execution);
+=======
+        Set<Long> candidateUserIds = taskCandidateInvoker.calculateUsersByTask(execution);
+        if (CollUtil.isEmpty(candidateUserIds)) {
+            return null;
+        }
+>>>>>>> master-jdk17
         // 第二步，后随机选择一个任务的处理人
         // 疑问：为什么一定要选择一个任务处理人？
         // 解答：项目对 bpm 的任务是责任到人，所以每个任务有且仅有一个处理人。

@@ -66,7 +66,8 @@ public class CrmPermissionUtils {
         if (CrmSceneTypeEnum.isInvolved(sceneType)) {
             query.innerJoin(CrmPermissionDO.class, on -> on.eq(CrmPermissionDO::getBizType, bizType)
                     .eq(CrmPermissionDO::getBizId, bizId)
-                    .in(CrmPermissionDO::getLevel, CrmPermissionLevelEnum.READ.getLevel(), CrmPermissionLevelEnum.WRITE.getLevel()));
+                    .in(CrmPermissionDO::getLevel, CrmPermissionLevelEnum.READ.getLevel(), CrmPermissionLevelEnum.WRITE.getLevel())
+                    .eq(CrmPermissionDO::getUserId,userId));
             query.ne(ownerUserIdField, userId);
         }
         // 2.3 场景三：下属负责的数据

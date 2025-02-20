@@ -7,11 +7,17 @@ import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import cn.iocoder.yudao.framework.datapermission.core.annotation.DataPermission;
 import cn.iocoder.yudao.module.bpm.framework.flowable.core.enums.BpmTaskCandidateStrategyEnum;
 import cn.iocoder.yudao.module.bpm.framework.flowable.core.util.BpmnModelUtils;
+<<<<<<< HEAD
+=======
+import cn.iocoder.yudao.module.bpm.framework.flowable.core.util.FlowableUtils;
+import cn.iocoder.yudao.module.bpm.service.task.BpmProcessInstanceService;
+>>>>>>> master-jdk17
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.BpmnModel;
+import org.flowable.bpmn.model.FlowElement;
 import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.delegate.DelegateExecution;
 
@@ -79,20 +85,85 @@ public class BpmTaskCandidateInvoker {
      * @return 用户编号集合
      */
     @DataPermission(enable = false) // 忽略数据权限，避免因为过滤，导致找不到候选人
+<<<<<<< HEAD
     public Set<Long> calculateUsers(DelegateExecution execution) {
         Integer strategy = BpmnModelUtils.parseCandidateStrategy(execution.getCurrentFlowElement());
         String param = BpmnModelUtils.parseCandidateParam(execution.getCurrentFlowElement());
         // 1.1 计算任务的候选人
         Set<Long> userIds = getCandidateStrategy(strategy).calculateUsers(execution, param);
+=======
+    public Set<Long> calculateUsersByTask(DelegateExecution execution) {
+        // 注意：解决极端情况下，Flowable 异步调用，导致租户 id 丢失的情况
+        // 例如说，SIMPLE 延迟器在 trigger 的时候！！！
+        return FlowableUtils.execute(execution.getTenantId(), () -> {
+            // 审批类型非人工审核时，不进行计算候选人。原因是：后续会自动通过、不通过
+            FlowElement flowElement = execution.getCurrentFlowElement();
+            Integer approveType = BpmnModelUtils.parseApproveType(flowElement);
+            if (ObjectUtils.equalsAny(approveType,
+                    BpmUserTaskApproveTypeEnum.AUTO_APPROVE.getType(),
+                    BpmUserTaskApproveTypeEnum.AUTO_REJECT.getType())) {
+                return new HashSet<>();
+            }
+
+            // 1.1 计算任务的候选人
+            Integer strategy = BpmnModelUtils.parseCandidateStrategy(flowElement);
+            String param = BpmnModelUtils.parseCandidateParam(flowElement);
+            Set<Long> userIds = getCandidateStrategy(strategy).calculateUsersByTask(execution, param);
+            // 1.2 移除被禁用的用户
+            removeDisableUsers(userIds);
+
+            // 2. 候选人为空时，根据“审批人为空”的配置补充
+            if (CollUtil.isEmpty(userIds)) {
+                userIds = getCandidateStrategy(BpmTaskCandidateStrategyEnum.ASSIGN_EMPTY.getStrategy())
+                        .calculateUsersByTask(execution, param);
+                // ASSIGN_EMPTY 策略，不需要移除被禁用的用户。原因是，再移除，可能会出现更没审批人了！！！
+            }
+
+            // 3. 移除发起人的用户
+            ProcessInstance processInstance = SpringUtil.getBean(BpmProcessInstanceService.class)
+                    .getProcessInstance(execution.getProcessInstanceId());
+            Assert.notNull(processInstance, "流程实例({}) 不存在", execution.getProcessInstanceId());
+            removeStartUserIfSkip(userIds, flowElement, Long.valueOf(processInstance.getStartUserId()));
+            return userIds;
+        });
+    }
+
+    public Set<Long> calculateUsersByActivity(BpmnModel bpmnModel, String activityId,
+                                              Long startUserId, String processDefinitionId, Map<String, Object> processVariables) {
+        // 审批类型非人工审核时，不进行计算候选人。原因是：后续会自动通过、不通过
+        FlowElement flowElement = BpmnModelUtils.getFlowElementById(bpmnModel, activityId);
+        Integer approveType = BpmnModelUtils.parseApproveType(flowElement);
+        if (ObjectUtils.equalsAny(approveType,
+                BpmUserTaskApproveTypeEnum.AUTO_APPROVE.getType(),
+                BpmUserTaskApproveTypeEnum.AUTO_REJECT.getType())) {
+            return new HashSet<>();
+        }
+
+        // 1.1 计算任务的候选人
+        Integer strategy = BpmnModelUtils.parseCandidateStrategy(flowElement);
+        String param = BpmnModelUtils.parseCandidateParam(flowElement);
+        Set<Long> userIds = getCandidateStrategy(strategy).calculateUsersByActivity(bpmnModel, activityId, param,
+                startUserId, processDefinitionId, processVariables);
+>>>>>>> master-jdk17
         // 1.2 移除被禁用的用户
         removeDisableUsers(userIds);
 
         // 2. 校验是否有候选人
         if (CollUtil.isEmpty(userIds)) {
+<<<<<<< HEAD
             log.error("[calculateUsers][流程任务({}/{}/{}) 任务规则({}/{}) 找不到候选人]", execution.getId(),
                     execution.getProcessDefinitionId(), execution.getCurrentActivityId(), strategy, param);
             throw exception(TASK_CREATE_FAIL_NO_CANDIDATE_USER);
         }
+=======
+            userIds = getCandidateStrategy(BpmTaskCandidateStrategyEnum.ASSIGN_EMPTY.getStrategy())
+                    .calculateUsersByActivity(bpmnModel, activityId, param, startUserId, processDefinitionId, processVariables);
+            // ASSIGN_EMPTY 策略，不需要移除被禁用的用户。原因是，再移除，可能会出现更没审批人了！！！
+        }
+
+        // 3. 移除发起人的用户
+        removeStartUserIfSkip(userIds, flowElement, startUserId);
+>>>>>>> master-jdk17
         return userIds;
     }
 
@@ -104,10 +175,34 @@ public class BpmTaskCandidateInvoker {
         Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(assigneeUserIds);
         assigneeUserIds.removeIf(id -> {
             AdminUserRespDTO user = userMap.get(id);
-            return user == null || !CommonStatusEnum.ENABLE.getStatus().equals(user.getStatus());
+            return user == null || CommonStatusEnum.isDisable(user.getStatus());
         });
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * 如果“审批人与发起人相同时”，配置了 SKIP 跳过，则移除发起人
+     *
+     * 注意：如果只有一个候选人，则不处理，避免无法审批
+     *
+     * @param assigneeUserIds 当前分配的候选人
+     * @param flowElement 当前节点
+     * @param startUserId 发起人
+     */
+    @VisibleForTesting
+    void removeStartUserIfSkip(Set<Long> assigneeUserIds, FlowElement flowElement, Long startUserId) {
+        if (CollUtil.size(assigneeUserIds) <= 1) {
+            return;
+        }
+        Integer assignStartUserHandlerType = BpmnModelUtils.parseAssignStartUserHandlerType(flowElement);
+        if (ObjectUtil.notEqual(assignStartUserHandlerType, BpmUserTaskAssignStartUserHandlerTypeEnum.SKIP.getType())) {
+            return;
+        }
+        assigneeUserIds.remove(startUserId);
+    }
+
+>>>>>>> master-jdk17
     private BpmTaskCandidateStrategy getCandidateStrategy(Integer strategy) {
         BpmTaskCandidateStrategyEnum strategyEnum = BpmTaskCandidateStrategyEnum.valueOf(strategy);
         Assert.notNull(strategyEnum, "策略(%s) 不存在", strategy);

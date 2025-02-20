@@ -6,9 +6,13 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.date.DateUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.bpm.controller.admin.base.user.UserSimpleBaseVO;
 import cn.iocoder.yudao.module.bpm.controller.admin.task.vo.cc.BpmProcessInstanceCopyRespVO;
 import cn.iocoder.yudao.module.bpm.controller.admin.task.vo.instance.BpmProcessInstanceCopyPageReqVO;
+import cn.iocoder.yudao.module.bpm.dal.dataobject.definition.BpmProcessDefinitionInfoDO;
 import cn.iocoder.yudao.module.bpm.dal.dataobject.task.BpmProcessInstanceCopyDO;
+import cn.iocoder.yudao.module.bpm.framework.flowable.core.util.FlowableUtils;
+import cn.iocoder.yudao.module.bpm.service.definition.BpmProcessDefinitionService;
 import cn.iocoder.yudao.module.bpm.service.task.BpmProcessInstanceCopyService;
 import cn.iocoder.yudao.module.bpm.service.task.BpmProcessInstanceService;
 import cn.iocoder.yudao.module.bpm.service.task.BpmTaskService;
@@ -29,8 +33,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
-import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertListByFlatMap;
-import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
+import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
 import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
 
 @Tag(name = "管理后台 - 流程实例抄送")
@@ -44,7 +47,11 @@ public class BpmProcessInstanceCopyController {
     @Resource
     private BpmProcessInstanceService processInstanceService;
     @Resource
+<<<<<<< HEAD
     private BpmTaskService taskService;
+=======
+    private BpmProcessDefinitionService processDefinitionService;
+>>>>>>> master-jdk17
 
     @Resource
     private AdminUserApi adminUserApi;
@@ -67,12 +74,29 @@ public class BpmProcessInstanceCopyController {
                 convertSet(pageResult.getList(), BpmProcessInstanceCopyDO::getProcessInstanceId));
         Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(convertListByFlatMap(pageResult.getList(),
                 copy -> Stream.of(copy.getStartUserId(), Long.parseLong(copy.getCreator()))));
+<<<<<<< HEAD
         return success(BeanUtils.toBean(pageResult, BpmProcessInstanceCopyRespVO.class, copyVO -> {
             MapUtils.findAndThen(userMap, Long.valueOf(copyVO.getCreator()), user -> copyVO.setCreatorName(user.getNickname()));
             MapUtils.findAndThen(userMap, copyVO.getStartUserId(), user -> copyVO.setStartUserName(user.getNickname()));
             MapUtils.findAndThen(taskNameMap, copyVO.getTaskId(), copyVO::setTaskName);
+=======
+        Map<String, BpmProcessDefinitionInfoDO> processDefinitionInfoMap = processDefinitionService.getProcessDefinitionInfoMap(
+                convertSet(pageResult.getList(), BpmProcessInstanceCopyDO::getProcessDefinitionId));
+        return success(convertPage(pageResult, copy -> {
+            BpmProcessInstanceCopyRespVO copyVO = BeanUtils.toBean(copy, BpmProcessInstanceCopyRespVO.class);
+            MapUtils.findAndThen(userMap, Long.valueOf(copy.getCreator()),
+                    user -> copyVO.setStartUser(BeanUtils.toBean(user, UserSimpleBaseVO.class)));
+            MapUtils.findAndThen(userMap, copy.getStartUserId(),
+                    user -> copyVO.setCreateUser(BeanUtils.toBean(user, UserSimpleBaseVO.class)));
+>>>>>>> master-jdk17
             MapUtils.findAndThen(processInstanceMap, copyVO.getProcessInstanceId(),
-                    processInstance -> copyVO.setProcessInstanceStartTime(DateUtils.of(processInstance.getStartTime())));
+                    processInstance -> {
+                        copyVO.setSummary(FlowableUtils.getSummary(
+                                processDefinitionInfoMap.get(processInstance.getProcessDefinitionId()),
+                                processInstance.getProcessVariables()));
+                        copyVO.setProcessInstanceStartTime(DateUtils.of(processInstance.getStartTime()));
+                    });
+            return copyVO;
         }));
     }
 

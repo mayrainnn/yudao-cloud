@@ -85,6 +85,31 @@ public interface BpmProcessInstanceService {
     PageResult<HistoricProcessInstance> getProcessInstancePage(Long userId,
                                                                @Valid BpmProcessInstancePageReqVO pageReqVO);
 
+<<<<<<< HEAD
+=======
+    // TODO @芋艿：重点在 review 下
+    /**
+     * 获取审批详情。
+     * <p>
+     * 可以是准备发起的流程、进行中的流程、已经结束的流程
+     *
+     * @param loginUserId  登录人的用户编号
+     * @param reqVO 请求信息
+     * @return 流程实例的进度
+     */
+    BpmApprovalDetailRespVO getApprovalDetail(Long loginUserId, @Valid BpmApprovalDetailReqVO reqVO);
+
+    /**
+     * 获取流程实例的 BPMN 模型视图
+     *
+     * @param id 流程实例的编号
+     * @return BPMN 模型视图
+     */
+    BpmProcessInstanceBpmnModelViewRespVO getProcessInstanceBpmnModelView(String id);
+
+    // ========== Update 写入相关方法 ==========
+
+>>>>>>> master-jdk17
     /**
      * 创建流程实例（提供给前端）
      *
@@ -134,11 +159,20 @@ public interface BpmProcessInstanceService {
     void updateProcessInstanceWhenApprove(ProcessInstance instance);
 
     /**
+<<<<<<< HEAD
      * 更新 ProcessInstance 拓展记录为不通过
      *
      * @param id     流程编号
      * @param reason 理由。例如说，审批不通过时，需要传递该值
      */
     void updateProcessInstanceReject(String id, String reason);
+=======
+     * 更新 ProcessInstance 的变量
+     *
+     * @param id 流程编号
+     * @param variables 流程变量
+     */
+    void updateProcessInstanceVariables(String id, Map<String, Object> variables);
+>>>>>>> master-jdk17
 
 }

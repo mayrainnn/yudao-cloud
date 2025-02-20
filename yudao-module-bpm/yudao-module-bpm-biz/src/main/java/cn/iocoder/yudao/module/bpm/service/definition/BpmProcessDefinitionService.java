@@ -18,7 +18,7 @@ import java.util.Set;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
 
 /**
- * Flowable流程定义接口
+ * 流程定义接口
  *
  * @author yunlong.li
  * @author ZJQ
@@ -48,10 +48,19 @@ public interface BpmProcessDefinitionService {
      * @param model 流程模型
      * @param modelMetaInfo 流程模型元信息
      * @param bpmnBytes BPMN XML 字节数组
+<<<<<<< HEAD
      * @param form 表单
      * @return 流程编号
      */
     String createProcessDefinition(Model model, BpmModelMetaInfoRespDTO modelMetaInfo, byte[] bpmnBytes, BpmFormDO form);
+=======
+     * @param simpleJson SIMPLE Model JSON
+     * @param form 表单
+     * @return 流程编号
+     */
+    String createProcessDefinition(Model model, BpmModelMetaInfoVO modelMetaInfo,
+                                   byte[] bpmnBytes, String simpleJson, BpmFormDO form);
+>>>>>>> master-jdk17
 
     /**
      * 更新流程定义状态
@@ -60,6 +69,14 @@ public interface BpmProcessDefinitionService {
      * @param state 状态
      */
     void updateProcessDefinitionState(String id, Integer state);
+
+    /**
+     * 更新模型编号
+     *
+     * @param modelId 流程定义编号
+     * @param sort 排序
+     */
+    void updateProcessDefinitionSortByModelId(String modelId, Long sort);
 
     /**
      * 获得流程定义对应的 BPMN

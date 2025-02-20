@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.trade.enums.order;
 
 import cn.hutool.core.util.ObjectUtil;
-import cn.iocoder.yudao.framework.common.core.IntArrayValuable;
+import cn.iocoder.yudao.framework.common.core.ArrayValuable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -14,7 +14,7 @@ import java.util.Arrays;
  */
 @RequiredArgsConstructor
 @Getter
-public enum TradeOrderTypeEnum implements IntArrayValuable {
+public enum TradeOrderTypeEnum implements ArrayValuable<Integer> {
 
     NORMAL(0, "普通订单"),
     SECKILL(1, "秒杀订单"),
@@ -22,7 +22,7 @@ public enum TradeOrderTypeEnum implements IntArrayValuable {
     COMBINATION(3, "拼团订单"),
     ;
 
-    public static final int[] ARRAYS = Arrays.stream(values()).mapToInt(TradeOrderTypeEnum::getType).toArray();
+    public static final Integer[] ARRAYS = Arrays.stream(values()).map(TradeOrderTypeEnum::getType).toArray(Integer[]::new);
 
     /**
      * 类型
@@ -34,7 +34,7 @@ public enum TradeOrderTypeEnum implements IntArrayValuable {
     private final String name;
 
     @Override
-    public int[] array() {
+    public Integer[] array() {
         return ARRAYS;
     }
 

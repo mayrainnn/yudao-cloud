@@ -85,4 +85,58 @@ public class TradePriceServiceImpl implements TradePriceService {
         return productSpuApi.validateSpuList(convertSet(skuList, ProductSkuRespDTO::getSpuId)).getCheckedData();
     }
 
+<<<<<<< HEAD
+=======
+    @Override
+    public List<AppTradeProductSettlementRespVO> calculateProductPrice(Long userId, List<Long> spuIds) {
+        // 1.1 获得 SPU 与 SKU 的映射
+        List<ProductSkuRespDTO> allSkuList = productSkuApi.getSkuListBySpuId(spuIds).getCheckedData();
+        Map<Long, List<ProductSkuRespDTO>> spuIdAndSkuListMap = convertMultiMap(allSkuList, ProductSkuRespDTO::getSpuId);
+        // 1.2 获得会员等级
+        MemberLevelRespDTO level = discountActivityPriceCalculator.getMemberLevel(userId);
+        // 1.3 获得限时折扣活动
+        Map<Long, DiscountProductRespDTO> skuIdAndDiscountMap = convertMap(
+                discountActivityApi.getMatchDiscountProductListBySkuIds(convertSet(allSkuList, ProductSkuRespDTO::getId)).getCheckedData(),
+                DiscountProductRespDTO::getSkuId);
+        // 1.4 获得满减送活动
+       List<RewardActivityMatchRespDTO> rewardActivityMap = rewardActivityApi.getMatchRewardActivityListBySpuIds(spuIds).getCheckedData();
+
+        // 2. 价格计算
+        return convertList(spuIds, spuId -> {
+            AppTradeProductSettlementRespVO spuVO = new AppTradeProductSettlementRespVO().setSpuId(spuId);
+            // 2.1 优惠价格
+            List<ProductSkuRespDTO> skuList = spuIdAndSkuListMap.get(spuId);
+            List<AppTradeProductSettlementRespVO.Sku> skuVOList = convertList(skuList, sku -> {
+                AppTradeProductSettlementRespVO.Sku skuVO = new AppTradeProductSettlementRespVO.Sku()
+                        .setId(sku.getId());
+                TradePriceCalculateRespBO.OrderItem orderItem = new TradePriceCalculateRespBO.OrderItem()
+                        .setPayPrice(sku.getPrice()).setCount(1);
+                // 计算限时折扣的优惠价格
+                DiscountProductRespDTO discountProduct = skuIdAndDiscountMap.get(sku.getId());
+                Integer discountPrice = discountActivityPriceCalculator.calculateActivityPrice(discountProduct, orderItem);
+                // 计算 VIP 优惠金额
+                Integer vipPrice = discountActivityPriceCalculator.calculateVipPrice(level, orderItem);
+                if (discountPrice <= 0 && vipPrice <= 0) {
+                    return skuVO;
+                }
+                // 选择一个大的优惠
+                if (discountPrice > vipPrice) {
+                    return skuVO.setPromotionPrice(sku.getPrice() - discountPrice)
+                            .setPromotionType(PromotionTypeEnum.DISCOUNT_ACTIVITY.getType())
+                            .setPromotionId(discountProduct.getId()).setPromotionEndTime(discountProduct.getActivityEndTime());
+                } else {
+                    return skuVO.setPromotionPrice(sku.getPrice() - vipPrice)
+                            .setPromotionType(PromotionTypeEnum.MEMBER_LEVEL.getType());
+                }
+            });
+            spuVO.setSkus(skuVOList);
+            // 2.2 满减送活动
+            RewardActivityMatchRespDTO rewardActivity = CollUtil.findOne(rewardActivityMap,
+                    activity -> CollUtil.contains(activity.getSpuIds(), spuId));
+            spuVO.setRewardActivity(BeanUtils.toBean(rewardActivity, AppTradeProductSettlementRespVO.RewardActivity.class));
+            return spuVO;
+        });
+    }
+
+>>>>>>> master-jdk17
 }
