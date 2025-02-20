@@ -84,14 +84,6 @@ public interface BpmProcessInstanceService {
     PageResult<HistoricProcessInstance> getProcessInstancePage(Long userId,
                                                                @Valid BpmProcessInstancePageReqVO pageReqVO);
 
-    /**
-     * 获得表单字段权限
-     *
-     * @param reqVO 请求消息
-     * @return 表单字段权限
-     */
-    Map<String, String> getFormFieldsPermission(@Valid BpmFormFieldsPermissionReqVO reqVO);
-
     // TODO @芋艿：重点在 review 下
     /**
      * 获取审批详情。
@@ -103,6 +95,14 @@ public interface BpmProcessInstanceService {
      * @return 流程实例的进度
      */
     BpmApprovalDetailRespVO getApprovalDetail(Long loginUserId, @Valid BpmApprovalDetailReqVO reqVO);
+
+    /**
+     * 获取流程实例的 BPMN 模型视图
+     *
+     * @param id 流程实例的编号
+     * @return BPMN 模型视图
+     */
+    BpmProcessInstanceBpmnModelViewRespVO getProcessInstanceBpmnModelView(String id);
 
     // ========== Update 写入相关方法 ==========
 
@@ -157,5 +157,12 @@ public interface BpmProcessInstanceService {
      */
     void processProcessInstanceCompleted(ProcessInstance instance);
 
+    /**
+     * 更新 ProcessInstance 的变量
+     *
+     * @param id 流程编号
+     * @param variables 流程变量
+     */
+    void updateProcessInstanceVariables(String id, Map<String, Object> variables);
 
 }

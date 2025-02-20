@@ -52,7 +52,7 @@ public interface BpmnModelConstants {
      */
     String USER_TASK_REJECT_HANDLER_TYPE = "rejectHandlerType";
     /**
-     * BPMN ExtensionElement 的扩展属性，用于标记用户任务拒绝后的回退的任务 Id
+     * BPMN ExtensionElement 的扩展属性，用于标记用户任务拒绝后的退回的任务 Id
      */
     String USER_TASK_REJECT_RETURN_TASK_ID = "rejectReturnTaskId";
 
@@ -101,17 +101,32 @@ public interface BpmnModelConstants {
     String BUTTON_SETTING_ELEMENT_ENABLE_ATTRIBUTE = "enable";
 
     /**
+     * BPMN ExtensionElement 的扩展属性，用于标记触发器的类型
+     */
+    String TRIGGER_TYPE = "triggerType";
+    /**
+     * BPMN ExtensionElement 的扩展属性，用于标记触发器参数
+     */
+    String TRIGGER_PARAM = "triggerParam";
+
+    /**
      * BPMN Start Event Node Id
      */
     String START_EVENT_NODE_ID = "StartEvent";
-    /**
-     * BPMN Start Event Node Name
-     */
-    String START_EVENT_NODE_NAME = "开始";
 
     /**
      * 发起人节点 ID
      */
     String START_USER_NODE_ID = "StartUserNode";
+
+    /**
+     * 是否需要签名
+     */
+    String SIGN_ENABLE = "signEnable";
+
+    /**
+     * 审批意见是否必填
+     */
+    String REASON_REQUIRE = "reasonRequire";
 
 }

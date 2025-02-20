@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
@@ -35,6 +36,7 @@ import cn.iocoder.yudao.module.trade.controller.app.order.vo.item.AppTradeOrderI
 import cn.iocoder.yudao.module.trade.convert.order.TradeOrderConvert;
 import cn.iocoder.yudao.module.trade.dal.dataobject.cart.CartDO;
 import cn.iocoder.yudao.module.trade.dal.dataobject.delivery.DeliveryExpressDO;
+import cn.iocoder.yudao.module.trade.dal.dataobject.delivery.DeliveryPickUpStoreDO;
 import cn.iocoder.yudao.module.trade.dal.dataobject.order.TradeOrderDO;
 import cn.iocoder.yudao.module.trade.dal.dataobject.order.TradeOrderItemDO;
 import cn.iocoder.yudao.module.trade.dal.mysql.order.TradeOrderItemMapper;
@@ -47,6 +49,7 @@ import cn.iocoder.yudao.module.trade.framework.order.core.annotations.TradeOrder
 import cn.iocoder.yudao.module.trade.framework.order.core.utils.TradeOrderLogUtils;
 import cn.iocoder.yudao.module.trade.service.cart.CartService;
 import cn.iocoder.yudao.module.trade.service.delivery.DeliveryExpressService;
+import cn.iocoder.yudao.module.trade.service.delivery.DeliveryPickUpStoreService;
 import cn.iocoder.yudao.module.trade.service.message.TradeMessageService;
 import cn.iocoder.yudao.module.trade.service.message.bo.TradeOrderMessageWhenDeliveryOrderReqBO;
 import cn.iocoder.yudao.module.trade.service.order.handler.TradeOrderHandler;
@@ -103,6 +106,8 @@ public class TradeOrderUpdateServiceImpl implements TradeOrderUpdateService {
     private DeliveryExpressService deliveryExpressService;
     @Resource
     private TradeMessageService tradeMessageService;
+    @Resource
+    private DeliveryPickUpStoreService pickUpStoreService;
 
     @Resource
     private PayOrderApi payOrderApi;
@@ -324,7 +329,7 @@ public class TradeOrderUpdateServiceImpl implements TradeOrderUpdateService {
     /**
      * 校验支付订单的合法性
      *
-     * @param order 交易订单
+     * @param order      交易订单
      * @param payOrderId 支付订单编号
      * @return 支付订单
      */
@@ -683,8 +688,9 @@ public class TradeOrderUpdateServiceImpl implements TradeOrderUpdateService {
         List<TradeOrderItemDO> updateItems = new ArrayList<>();
         for (int i = 0; i < orderOrderItems.size(); i++) {
             TradeOrderItemDO item = orderOrderItems.get(i);
-            updateItems.add(new TradeOrderItemDO().setId(item.getId()).setAdjustPrice(item.getAdjustPrice() + dividePrices.get(i))
-                    .setPayPrice((item.getPayPrice() - item.getAdjustPrice()) + dividePrices.get(i)));
+            updateItems.add(new TradeOrderItemDO().setId(item.getId())
+                    .setAdjustPrice(item.getAdjustPrice() + dividePrices.get(i))
+                    .setPayPrice(item.getPayPrice() + dividePrices.get(i)));
         }
         tradeOrderItemMapper.updateBatch(updateItems);
 
@@ -717,14 +723,14 @@ public class TradeOrderUpdateServiceImpl implements TradeOrderUpdateService {
 
     @Override
     @TradeOrderLog(operateType = TradeOrderOperateTypeEnum.ADMIN_PICK_UP_RECEIVE)
-    public void pickUpOrderByAdmin(Long id) {
-        getSelf().pickUpOrder(tradeOrderMapper.selectById(id));
+    public void pickUpOrderByAdmin(Long userId, Long id) {
+        getSelf().pickUpOrder(userId, tradeOrderMapper.selectById(id));
     }
 
     @Override
     @TradeOrderLog(operateType = TradeOrderOperateTypeEnum.ADMIN_PICK_UP_RECEIVE)
-    public void pickUpOrderByAdmin(String pickUpVerifyCode) {
-        getSelf().pickUpOrder(tradeOrderMapper.selectOneByPickUpVerifyCode(pickUpVerifyCode));
+    public void pickUpOrderByAdmin(Long userId, String pickUpVerifyCode) {
+        getSelf().pickUpOrder(userId, tradeOrderMapper.selectOneByPickUpVerifyCode(pickUpVerifyCode));
     }
 
     @Override
@@ -733,13 +739,19 @@ public class TradeOrderUpdateServiceImpl implements TradeOrderUpdateService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void pickUpOrder(TradeOrderDO order) {
+    public void pickUpOrder(Long userId, TradeOrderDO order) {
         if (order == null) {
             throw exception(ORDER_NOT_FOUND);
         }
         if (ObjUtil.notEqual(DeliveryTypeEnum.PICK_UP.getType(), order.getDeliveryType())) {
             throw exception(ORDER_RECEIVE_FAIL_DELIVERY_TYPE_NOT_PICK_UP);
         }
+        DeliveryPickUpStoreDO deliveryPickUpStore = pickUpStoreService.getDeliveryPickUpStore(order.getPickUpStoreId());
+        if (deliveryPickUpStore == null
+                || !CollUtil.contains(deliveryPickUpStore.getVerifyUserIds(), userId)) {
+            throw exception(ORDER_PICK_UP_FAIL_NOT_VERIFY_USER);
+        }
+
         receiveOrder0(order);
     }
 
@@ -888,8 +900,8 @@ public class TradeOrderUpdateServiceImpl implements TradeOrderUpdateService {
         if (!order.getPayStatus()) {
             throw exception(ORDER_CANCEL_PAID_FAIL, "已支付");
         }
-        // 1.3 校验订单是否已退款
-        if (ObjUtil.equal(TradeOrderRefundStatusEnum.NONE.getStatus(), order.getRefundStatus())) {
+        // 1.3 校验订单是否未退款
+        if (ObjUtil.notEqual(TradeOrderRefundStatusEnum.NONE.getStatus(), order.getRefundStatus())) {
             throw exception(ORDER_CANCEL_PAID_FAIL, "未退款");
         }
 
@@ -897,7 +909,8 @@ public class TradeOrderUpdateServiceImpl implements TradeOrderUpdateService {
         cancelOrder0(order, TradeOrderCancelTypeEnum.COMBINATION_CLOSE);
         // 2.2 创建退款单
         payRefundApi.createRefund(new PayRefundCreateReqDTO()
-                .setAppKey(tradeOrderProperties.getPayAppKey()).setUserIp(getClientIP()) // 支付应用
+                .setAppKey(tradeOrderProperties.getPayAppKey())  // 支付应用
+                .setUserIp(NetUtil.getLocalhostStr()) // 使用本机 IP，因为是服务器发起退款的
                 .setMerchantOrderId(String.valueOf(order.getId())) // 支付单号
                 .setMerchantRefundId(String.valueOf(order.getId()))
                 .setReason(TradeOrderCancelTypeEnum.COMBINATION_CLOSE.getName()).setPrice(order.getPayPrice())).checkError(); // 价格信息
